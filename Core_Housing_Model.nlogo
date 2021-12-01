@@ -1,11 +1,12 @@
 globals [
-  percent-similar  ;; on the average, what percent of a turtle's neighbors
+  percent-cannot-afford  ;; on the average, what percent of a turtle's neighbors
                    ;; are the same color as that turtle?
   percent-unhappy  ;; what percent of the turtles are unhappy?
 ]
 
 turtles-own [
   happy?          ;; for each household, indicates if they want to stay in their current housing situation
+  cannot-afford?  ;; for each household, indicates if they can afford their current house
   adults          ;; how many adults in the household
   kids            ;; how many kids in the household
   members         ;; total number of people in the household
@@ -65,17 +66,20 @@ to set-income
   if color = yellow [
     set income ((random 5 + 1) * 200 * [adults] of self)]
     if color = orange [
-      set income ((random 7 + 1) * 350 * [adults] of self)]
+      set income ((random 5 + 1) * 350 * [adults] of self)]
     if color = red [
-      set income ((random 10 + 1) * 500 * [adults] of self)]
+      set income ((random 5 + 1) * 500 * [adults] of self)]
 end
 
 to go
   ;if all? turtles [ happy? ] [ stop ]
   move-unhappy-turtles
+  update-houses
   update-turtles
   update-globals
   plot-house-prices
+  plot-incomes
+  plot-rooms
   tick
 end
 ;
@@ -91,34 +95,44 @@ to find-new-spot
     [ find-new-spot ]          ;; keep going until we find an unoccupied patch
   setxy pxcor pycor  ;; move to center of patch
 end
-;
+
 to update-turtles
   ask turtles [
     ; this line checks if there's enough room for the family in the current house they're at
-    ifelse [rooms] of patch-here < [members] of self[
+    ifelse [rooms] of patch-here >= members[
       set happy? True][
       set happy? False]
-    if [rent-price] of patch-here > [income] of self [
-      set happy? False]
-;    ;; in next two lines, we use "neighbors" to test the eight patches
-;    ;; surrounding the current patch
-;
-;    ;; count the number of my neighbors that are the same color as me
-;    set similar-nearby count (turtles-on neighbors)
-;      with [color = [color] of myself]
-;
-;    ;; count the total number of neighbors
-;    set total-nearby count (turtles-on neighbors)
-;
-;    ;; I’m happy if there are at least the minimal number of same-colored neighbors
-;    set happy? similar-nearby >= ( %-similar-wanted * total-nearby / 100 )
+    ifelse [rent-price] of patch-here > income [
+      set happy? False
+      set cannot-afford? True][
+      set cannot-afford? False]
+    ; the next command is used to update the income of the household
+    let income_past income
+    set income round(income_past + 0.01 * income_past)
+    ;grow the number of rooms in the house if really rich
+    if [rooms] of patch-here < members and (([rent-price] of patch-here) * 3) < income[
+      ask patch-here[
+        let old_rooms rooms
+      set rooms (old_rooms + 1)
+      ]
+    ]
   ]
 end
-;
+
+to update-houses
+  ;;increases the price of the house based on the price of neighbouring houses and the income of their occupants
+  ask patches[
+    let avg-income mean ([income] of turtles-on neighbors)
+    let avg-price mean ([rent-price] of neighbors)
+    let old-price rent-price
+    set rent-price round(old-price + 0.001 * old-price + 0.001 * avg-income + 0.008 * avg-price)
+  ]
+end
+
 to update-globals
 ;  let similar-neighbors sum [similar-nearby] of turtles
 ;  let total-neighbors sum [total-nearby] of turtles
-;  set percent-similar (similar-neighbors / total-neighbors) * 100
+  set percent-cannot-afford (count turtles with [cannot-afford?]) / (count turtles) * 100
   set percent-unhappy (count turtles with [not happy?]) / (count turtles) * 100
 end
 ;
@@ -126,9 +140,25 @@ to plot-house-prices
   set-current-plot "House prices"
   set-plot-pen-mode 1
   set-plot-x-range (min[rent-price] of patches) (max[rent-price] of patches)
-  set-plot-y-range 0 100
+  ;set-plot-y-range 0 100
   histogram [rent-price] of patches
   set-histogram-num-bars 10
+end
+
+to plot-incomes
+  set-current-plot "Incomes"
+  set-plot-pen-mode 1
+  set-plot-x-range (min[income] of turtles) (max[income] of turtles)
+  ;set-plot-y-range 0 100
+  histogram [income] of turtles
+  set-histogram-num-bars 10
+end
+
+to plot-rooms
+  set-current-plot "Rooms"
+  set-plot-pen-mode 1
+  set-plot-x-range 0 8
+  histogram [rooms] of patches
 end
 ;
 ;; Copyright 2006 Uri Wilensky.
@@ -175,10 +205,10 @@ percent-unhappy
 MONITOR
 11
 455
-119
+128
 500
-Percent Similar
-percent-similar
+Percent cant afford
+percent-cannot-afford
 1
 1
 11
@@ -188,7 +218,7 @@ PLOT
 140
 259
 283
-Percent Similar
+Percent of households that cannot afford their house
 time
 %
 0.0
@@ -199,7 +229,7 @@ true
 false
 "" ""
 PENS
-"percent" 1.0 0 -2674135 true "" "plot percent-similar"
+"percent" 1.0 0 -2674135 true "" "plot percent-cannot-afford"
 
 PLOT
 10
@@ -228,7 +258,7 @@ number
 number
 500
 5800
-1110.0
+1430.0
 10
 1
 NIL
@@ -316,7 +346,43 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" ""
+"default" 1.0 0 -10899396 true "" ""
+
+PLOT
+790
+180
+990
+330
+Incomes
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 1 -5825686 true "" ""
+
+PLOT
+790
+330
+990
+480
+Rooms
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -2674135 true "" ""
 
 @#$#@#$#@
 ## ACKNOWLEDGMENT

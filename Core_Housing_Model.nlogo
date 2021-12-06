@@ -16,7 +16,7 @@ turtles-own [
 
 patches-own [
   rooms           ;; the number of rooms in the house
-  dimension-rooms       ;; size of the house in square meters
+  dimension-rooms ;; size of the house in square meters
   price-sqm       ;; price of each square metre
   rent-price      ;; cost of monthly rent for the whole house
 ]
@@ -44,7 +44,7 @@ to setup
   ask patches [
     set rooms one-of [1 2 3 4 5 6 7]
     set dimension-rooms (rooms * (random 10 + 1))
-    set price-sqm ((random-gamma 9 6) * 10 + 10)
+    set price-sqm ((random-gamma 9 6) * 20 + 10)
     set rent-price (dimension-rooms * price-sqm)
     set pcolor scale-color green rent-price (max[rent-price] of patches) (min[rent-price] of patches)
   ]
@@ -274,21 +274,6 @@ number
 10
 1
 NIL
-HORIZONTAL
-
-SLIDER
-15
-95
-240
-128
-%-similar-wanted
-%-similar-wanted
-0.0
-100.0
-30.0
-1.0
-1
-%
 HORIZONTAL
 
 BUTTON

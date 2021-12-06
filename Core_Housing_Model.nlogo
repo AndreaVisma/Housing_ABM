@@ -16,7 +16,7 @@ turtles-own [
 
 patches-own [
   rooms           ;; the number of rooms in the house
-  dimension       ;; size of the house in square meters
+  dimension-rooms       ;; size of the house in square meters
   price-sqm       ;; price of each square metre
   rent-price      ;; cost of monthly rent for the whole house
 ]
@@ -38,13 +38,14 @@ to setup
     set kids one-of [0 1 2 3 4 5]
     set members (adults + kids)
     set-income ;important that this happens after the number of adults has been set
-    set shape "person"
+    set shape "circle"
+    set size 0.5
   ]
   ask patches [
     set rooms one-of [1 2 3 4 5 6 7]
-    set dimension (random 200 + 10)
-    set price-sqm (random 9 + 1)
-    set rent-price (dimension * price-sqm)
+    set dimension-rooms (rooms * (random 10 + 1))
+    set price-sqm ((random-gamma 9 6) * 10 + 10)
+    set rent-price (dimension-rooms * price-sqm)
     set pcolor scale-color green rent-price (max[rent-price] of patches) (min[rent-price] of patches)
   ]
   update-turtles
@@ -64,11 +65,11 @@ end
 
 to set-income
   if color = yellow [
-    set income ((random 5 + 1) * 200 * [adults] of self)]
+    set income ((random-gamma 9 6) * 200 * [adults] of self)]
     if color = orange [
-      set income ((random 5 + 1) * 350 * [adults] of self)]
+      set income ((random-gamma 9 6) * 350 * [adults] of self)]
     if color = red [
-      set income ((random 5 + 1) * 500 * [adults] of self)]
+      set income ((random-gamma 9 6) * 500 * [adults] of self)]
 end
 
 to go
@@ -108,7 +109,7 @@ to update-turtles
       set cannot-afford? False]
     ; the next command is used to update the income of the household
     let income_past income
-    set income round(income_past + 0.01 * income_past)
+    set income round(income_past + 0.003 * mean([income] of turtles in-radius 3))
     ;grow the number of rooms in the house if really rich
     if [rooms] of patch-here < members and (([rent-price] of patch-here) * 3) < income[
       ask patch-here[
@@ -122,10 +123,21 @@ end
 to update-houses
   ;;increases the price of the house based on the price of neighbouring houses and the income of their occupants
   ask patches[
-    let avg-income mean ([income] of turtles-on neighbors)
-    let avg-price mean ([rent-price] of neighbors)
     let old-price rent-price
-    set rent-price round(old-price + 0.001 * old-price + 0.001 * avg-income + 0.008 * avg-price)
+    let avg-price mean ([rent-price] of neighbors)
+    ; if there's no turtles around the house, set the average income to the global average of incomes
+    ifelse any? turtles-on neighbors[
+      let avg-income mean ([income] of turtles-on neighbors)
+      set rent-price round(old-price + 0.003 * avg-price) ; could also include a factor for the average income of turtles around
+    ][
+      let avg-income mean ([income] of turtles)
+      set rent-price round(old-price + 0.003 * avg-price) ; could also include a factor for the average income of turtles around
+    ]
+     if ticks mod 10 = 0[
+      set pcolor scale-color green rent-price (max[rent-price] of patches) (min[rent-price] of patches)
+     ;; this command here is suuper useful to see the clustering in house prices. However, having it run at
+     ;; every period makes the simulation really slow
+    ]
   ]
 end
 
@@ -142,7 +154,7 @@ to plot-house-prices
   set-plot-x-range (min[rent-price] of patches) (max[rent-price] of patches)
   ;set-plot-y-range 0 100
   histogram [rent-price] of patches
-  set-histogram-num-bars 10
+  set-histogram-num-bars 100
 end
 
 to plot-incomes
@@ -151,7 +163,7 @@ to plot-incomes
   set-plot-x-range (min[income] of turtles) (max[income] of turtles)
   ;set-plot-y-range 0 100
   histogram [income] of turtles
-  set-histogram-num-bars 10
+  set-histogram-num-bars 100
 end
 
 to plot-rooms
@@ -257,8 +269,8 @@ SLIDER
 number
 number
 500
-5800
-1430.0
+1600
+1010.0
 10
 1
 NIL

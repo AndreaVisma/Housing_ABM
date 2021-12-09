@@ -1,0 +1,29 @@
+;; determines the geographical distribution of house prices
+
+globals [
+  city-border
+]
+
+to price-clustering 
+  
+  set city-border (max-pxcor)
+  
+  ask patches [
+    ; first, compute distance from the center - arguably an important factor in determining house prices
+    let distance-from-center distancexy 0 0 
+    let distance-markup (2 * (1 + (1 - (distance-from-center / max-pxcor))))
+    ; add amarkup that divides city center from periphery (being outside the city border)
+    ifelse distance-from-center < city-border [
+      set perif-markup 1.5][
+      set perif-markup 1 
+    ]
+   
+    set rent-price (dimension * price-sqm * distance-markup * perif-markup)
+    
+    ; set the colours based on the rent-price
+    set pcolor scale-color green rent-price (max[rent-price] of patches) (min[rent-price] of patches)
+  ]
+  
+  
+  
+end

@@ -1,3 +1,5 @@
+__includes ["price_clustering.nls"]
+
 globals [
   percent-cannot-afford  ;; on the average, what percent of a turtle's neighbors
                    ;; are the same color as that turtle?
@@ -16,9 +18,10 @@ turtles-own [
 
 patches-own [
   rooms           ;; the number of rooms in the house
-  dimension-rooms ;; size of the house in square meters
+  dimension ;; size of the house in square meters
   price-sqm       ;; price of each square metre
   rent-price      ;; cost of monthly rent for the whole house
+  perif-markup
 ]
 
 
@@ -30,6 +33,7 @@ to setup
   ask n-of number patches [
     sprout 1
   ]
+
   ask turtles [
     ;; set initial characteristics of the households
     set color one-of [yellow orange red]
@@ -41,14 +45,18 @@ to setup
     set shape "circle"
     set size 0.5
   ]
+
   ask patches [
     set rooms one-of [1 2 3 4 5 6 7]
-    set dimension-rooms (rooms * (random 10 + 1))
-    set price-sqm ((random-gamma 9 6) * 20 + 10)
-    set rent-price (dimension-rooms * price-sqm)
-    set pcolor scale-color green rent-price (max[rent-price] of patches) (min[rent-price] of patches)
+    set dimension (rooms * (random 5 + 5))
+    set price-sqm ((random-gamma 9 6) * 10)
   ]
+
+  ;; calls the function price_clustering, which determines the geographical distribution of house prices
+  price-clustering
+  ;; updates turtles
   update-turtles
+  ;; updates global variables
   update-globals
   reset-ticks
 end
@@ -65,11 +73,11 @@ end
 
 to set-income
   if color = yellow [
-    set income ((random-gamma 9 6) * 200 * [adults] of self)]
+    set income ((random-gamma 9 6) * 400 * [adults] of self)]
     if color = orange [
-      set income ((random-gamma 9 6) * 350 * [adults] of self)]
+      set income ((random-gamma 9 6) * 800 * [adults] of self)]
     if color = red [
-      set income ((random-gamma 9 6) * 500 * [adults] of self)]
+      set income ((random-gamma 9 6) * 1200 * [adults] of self)]
 end
 
 to go
@@ -133,7 +141,7 @@ to update-houses
       let avg-income mean ([income] of turtles)
       set rent-price round(old-price + 0.003 * avg-price) ; could also include a factor for the average income of turtles around
     ]
-     if ticks mod 10 = 0[
+     if ticks mod 20 = 0[
       set pcolor scale-color green rent-price (max[rent-price] of patches) (min[rent-price] of patches)
      ;; this command here is suuper useful to see the clustering in house prices. However, having it run at
      ;; every period makes the simulation really slow
@@ -179,11 +187,11 @@ end
 GRAPHICS-WINDOW
 275
 10
-763
-499
+769
+505
 -1
 -1
-11.71
+8.0
 1
 10
 1
@@ -193,10 +201,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--20
-20
--20
-20
+-30
+30
+-30
+30
 1
 1
 1
@@ -268,9 +276,9 @@ SLIDER
 88
 number
 number
-500
-1600
-1010.0
+1000
+4000
+3610.0
 10
 1
 NIL

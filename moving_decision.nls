@@ -1,0 +1,37 @@
+;; determines the function that turtles follow when moving 
+;; In the current specification, turtles choose 5 random houses around them and 
+;; pick the one that better matches their preferences
+
+to find-new-spot
+  let scores []
+  let xcor-aim []
+  let ycor-aim []
+  
+  let i 1
+  
+  while [i <= 5][
+    rt random-float 360
+    fd random-float 10
+    if not any? other turtles-here [ ;; if the house is empty, then it gets considered
+      ifelse [rent-price] of patch-here > (income + 0.1 * wealth) [ ; if the house cannot be afforded, look elsewhere
+        set scores lput 0 scores][
+        let score-here 50  ; arbitrarily assigned value if the house can be afforded
+        ifelse [rooms] of patch-here >= members [ ; check number of rooms
+          set score-here (score-here + 10)][ ; positive if there is enough place
+          set score-here (score-here - 10)]  ; negative if not enough place, but still ok to move
+        let distance-from-center distancexy 0 0 
+        set score-here (score-here + (max-pxcor - distance-from-center))
+        set scores lput score-here scores]
+      
+      set xcor-aim lput (pxcor) xcor-aim
+      set ycor-aim lput (pycor) ycor-aim
+      set i (i + 1)
+      fd random-float 10 - 10 ; send them back a bit in the direction the turtles came from
+      ]
+  ]
+  
+  let max-score max scores
+  let index position max-score scores
+  
+  setxy (item index xcor-aim) (item index ycor-aim)
+end

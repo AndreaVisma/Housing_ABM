@@ -1,4 +1,6 @@
-__includes ["price_clustering.nls"]
+__includes ["price_clustering.nls"
+            "moving_decision.nls"
+            "plots.nls" ]
 
 globals [
   percent-cannot-afford  ;; on the average, what percent of a turtle's neighbors
@@ -14,6 +16,8 @@ turtles-own [
   members         ;; total number of people in the household
   class           ;; indicates the class to which the household belongs. Key determinant of income dynamics
   income          ;; indicates the income per period accrued by the family
+  wealth          ;; a pot of wealth that gets accumulated using unspent incomes
+  just-moved?     ;; set to 1 if the turtle has just moved
 ]
 
 patches-own [
@@ -27,6 +31,7 @@ patches-own [
 
 to setup
   clear-all
+  reset-ticks
   ;; create a turtle on NUMBER randomly selected patches.
   ;; note that slider's maximum value is 5800 which is a little less than the total number of patches,
   ;; which is 6400
@@ -41,7 +46,8 @@ to setup
     set adults one-of [1 2]
     set kids one-of [0 1 2 3 4 5]
     set members (adults + kids)
-    set-income ;important that this happens after the number of adults has been set
+    set-income-and-wealth ;important that this happens after the number of adults has been set
+    set just-moved? 0
     set shape "circle"
     set size 0.5
   ]
@@ -49,7 +55,7 @@ to setup
   ask patches [
     set rooms one-of [1 2 3 4 5 6 7]
     set dimension (rooms * (random 5 + 5))
-    set price-sqm ((random-gamma 9 6) * 10)
+    set price-sqm ((random-gamma 9 6) * 13)
   ]
 
   ;; calls the function price_clustering, which determines the geographical distribution of house prices
@@ -71,13 +77,16 @@ to class-assignment
       set class "upper class"]
 end
 
-to set-income
+to set-income-and-wealth
   if color = yellow [
-    set income ((random-gamma 9 6) * 400 * [adults] of self)]
+    set income ((random-gamma 9 6) * 400 * [adults] of self)
+    set wealth random 200 + 100 ]
     if color = orange [
-      set income ((random-gamma 9 6) * 800 * [adults] of self)]
+      set income ((random-gamma 9 6) * 800 * [adults] of self)
+      set wealth random 500 + 300 ]
     if color = red [
-      set income ((random-gamma 9 6) * 1200 * [adults] of self)]
+      set income ((random-gamma 9 6) * 1200 * [adults] of self)
+      set wealth random 1000 + 500 ]
 end
 
 to go
@@ -89,20 +98,16 @@ to go
   plot-house-prices
   plot-incomes
   plot-rooms
+  plot-wealth
   tick
 end
 ;
 to move-unhappy-turtles
   ask turtles with [ not happy? ]
-    [ find-new-spot ]
-end
-
-to find-new-spot
-  rt random-float 360
-  fd random-float 10
-  if any? other turtles-here
-    [ find-new-spot ]          ;; keep going until we find an unoccupied patch
-  setxy pxcor pycor  ;; move to center of patch
+    [ find-new-spot   ; now in separate nls file
+      set just-moved? 1]
+  ask turtles with [ happy? ]
+  [ set just-moved? 0 ]
 end
 
 to update-turtles
@@ -111,7 +116,7 @@ to update-turtles
     ifelse [rooms] of patch-here >= members[
       set happy? True][
       set happy? False]
-    ifelse [rent-price] of patch-here > income [
+    ifelse [rent-price] of patch-here > (income + 0.1 * wealth) [ ; house can be paid for using wealth pot
       set happy? False
       set cannot-afford? True][
       set cannot-afford? False]
@@ -125,6 +130,12 @@ to update-turtles
       set rooms (old_rooms + 1)
       ]
     ]
+    if ticks > 0 [ ; doesn't run for the first period to ensure not too many patches end with zero wealth
+    ifelse income - [rent-price] of patch-here < 0 [
+      set wealth max list 0 floor (wealth + (income - [rent-price] of patch-here))]
+    [ set wealth max list 0 floor (wealth + 0.13 * (income - [rent-price] of patch-here))] ; from average savings rates:
+      ; https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Households_-_statistics_on_disposable_income,_saving_and_investment
+  ]
   ]
 end
 
@@ -142,7 +153,7 @@ to update-houses
       set rent-price round(old-price + 0.003 * avg-price) ; could also include a factor for the average income of turtles around
     ]
      if ticks mod 20 = 0[
-      set pcolor scale-color green rent-price (max[rent-price] of patches) (min[rent-price] of patches)
+      set pcolor scale-color blue rent-price (max[rent-price] of patches) (min[rent-price] of patches)
      ;; this command here is suuper useful to see the clustering in house prices. However, having it run at
      ;; every period makes the simulation really slow
     ]
@@ -155,34 +166,6 @@ to update-globals
   set percent-cannot-afford (count turtles with [cannot-afford?]) / (count turtles) * 100
   set percent-unhappy (count turtles with [not happy?]) / (count turtles) * 100
 end
-;
-to plot-house-prices
-  set-current-plot "House prices"
-  set-plot-pen-mode 1
-  set-plot-x-range (min[rent-price] of patches) (max[rent-price] of patches)
-  ;set-plot-y-range 0 100
-  histogram [rent-price] of patches
-  set-histogram-num-bars 100
-end
-
-to plot-incomes
-  set-current-plot "Incomes"
-  set-plot-pen-mode 1
-  set-plot-x-range (min[income] of turtles) (max[income] of turtles)
-  ;set-plot-y-range 0 100
-  histogram [income] of turtles
-  set-histogram-num-bars 100
-end
-
-to plot-rooms
-  set-current-plot "Rooms"
-  set-plot-pen-mode 1
-  set-plot-x-range 0 8
-  histogram [rooms] of patches
-end
-;
-;; Copyright 2006 Uri Wilensky.
-;; See Info tab for full copyright and license.
 @#$#@#$#@
 GRAPHICS-WINDOW
 275
@@ -191,7 +174,7 @@ GRAPHICS-WINDOW
 505
 -1
 -1
-8.0
+6.0
 1
 10
 1
@@ -201,10 +184,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--30
-30
--30
-30
+-40
+40
+-40
+40
 1
 1
 1
@@ -277,8 +260,8 @@ SLIDER
 number
 number
 1000
-4000
-3610.0
+5000
+5000.0
 10
 1
 NIL
@@ -372,9 +355,9 @@ PENS
 "default" 1.0 1 -5825686 true "" ""
 
 PLOT
-790
+1000
 330
-990
+1200
 480
 Rooms
 NIL
@@ -388,6 +371,42 @@ false
 "" ""
 PENS
 "default" 1.0 0 -2674135 true "" ""
+
+PLOT
+790
+330
+990
+480
+Wealth distr
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -11221820 true "" ""
+
+PLOT
+1005
+185
+1205
+335
+turtles that moved
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count turtles with [just-moved? = 1]"
 
 @#$#@#$#@
 ## ACKNOWLEDGMENT

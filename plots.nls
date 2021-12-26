@@ -1,0 +1,35 @@
+;; collects all the plotting procedures
+
+to plot-house-prices
+  set-current-plot "House prices"
+  set-plot-pen-mode 1
+  set-plot-x-range (min[rent-price] of patches) (max[rent-price] of patches)
+  ;set-plot-y-range 0 100
+  histogram [rent-price] of patches
+  set-histogram-num-bars 100
+end
+
+to plot-incomes
+  set-current-plot "Incomes"
+  set-plot-pen-mode 1
+  set-plot-x-range (min[income] of turtles) (max[income] of turtles)
+  ;set-plot-y-range 0 100
+  histogram [income] of turtles
+  set-histogram-num-bars 100
+end
+
+to plot-wealth
+  set-current-plot "Wealth distr"
+  set-plot-pen-mode 1
+  set-plot-x-range (min[wealth] of turtles) (max[wealth] of turtles)
+  ;set-plot-y-range 0 100
+  histogram [wealth] of turtles
+  set-histogram-num-bars 100
+end
+
+to plot-rooms
+  set-current-plot "Rooms"
+  set-plot-pen-mode 1
+  set-plot-x-range 0 8
+  histogram [rooms] of patches
+end

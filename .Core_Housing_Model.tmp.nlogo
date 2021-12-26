@@ -56,7 +56,7 @@ to setup
   ask patches [
     set rooms one-of [1 2 3 4 5 6 7]
     set dimension (rooms * (random 5 + 5))
-    set price-sqm ((random-gamma 9 6) * 11)
+    set price-sqm ((random-gamma 9 6) * 1)
   ]
 
   ;; calls the function price_clustering, which determines the geographical distribution of house prices
@@ -81,13 +81,13 @@ end
 to set-income-and-wealth
   if color = yellow [
     set income ((random-gamma 9 6) * 400 * [adults] of self)
-    set wealth random 200 + 100 ]
+    set wealth round (random-gamma 9 6) * 300 ]
     if color = orange [
       set income ((random-gamma 9 6) * 800 * [adults] of self)
-      set wealth random 500 + 300 ]
+      set wealth round (random-gamma 9 6) * 650 ]
     if color = red [
       set income ((random-gamma 9 6) * 1200 * [adults] of self)
-      set wealth random 1000 + 500 ]
+      set wealth round (random-gamma 9 6) * 1000 ]
 end
 
 to go
@@ -170,7 +170,7 @@ to update-houses
       set rent-price round(old-price + 0.003 * avg-price) ; could also include a factor for the average income of turtles around
     ]
      if ticks mod 20 = 0[
-      set pcolor scale-color blue rent-price (max[rent-price] of patches) (min[rent-price] of patches)
+      set pcolor scale-color violet rent-price (max[rent-price] of patches) (min[rent-price] of patches)
      ;; this command here is suuper useful to see the clustering in house prices. However, having it run at
      ;; every period makes the simulation really slow
     ]

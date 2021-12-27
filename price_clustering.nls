@@ -12,16 +12,33 @@ to price-clustering
     ; first, compute distance from the center - arguably an important factor in determining house prices
     let distance-from-center distancexy 0 0 
     let distance-markup (2 * (1 + (1 - (distance-from-center / max-pxcor))))
+    
     ; add amarkup that divides city center from periphery (being outside the city border)
     ifelse distance-from-center < city-border [
       set perif-markup 1.5][
       set perif-markup 1 
     ]
-   
-    set rent-price (dimension * price-sqm * distance-markup * perif-markup)
+    
+    ; have four inner city districts, each of which is increasingly more desirable 
+    ; this gets reflected in house prices, with the addition of a markup
+    ifelse distance-from-center < max-pxcor [ ; districts exist only in the inner city
+      if pxcor >= 0 and pycor >= 0 [ ; 1st district - 1st quadrant
+        set district-markup 1.1]
+      if pxcor > 0 and pycor < 0 [ ; 2nd district 2nd quadrant
+        set district-markup 1.1]
+      if pxcor <= 0 and pycor <= 0 [ ;3rd district - 3rd quadrant
+        set district-markup 1.3]
+      if pxcor < 0 and pycor > 0 [ ; 4th district - 4th quadrant
+        set district-markup 1.5]
+    ][
+      set district-markup 1
+    ]
+ 
+    ; set rent price by interaxting all the possible markups
+    set rent-price (dimension * price-sqm * distance-markup * perif-markup * district-markup)
     
     ; set the colours based on the rent-price
-    set pcolor scale-color blue rent-price (max[rent-price] of patches) (min[rent-price] of patches)
+    set pcolor scale-color violet rent-price (max[rent-price] of patches) (min[rent-price] of patches)
   ]
   
 end

@@ -7,6 +7,7 @@ globals [
                    ;; are the same color as that turtle?
   percent-unhappy  ;; what percent of the turtles are unhappy?
   network-list     ;; collects the number of turtles that are in each turtle's network
+  network-list-class ;; collects the number of turtles that are in each turtle's network which are not the same class
 ]
 
 turtles-own [
@@ -35,6 +36,7 @@ to setup
   clear-all
   reset-ticks
   set network-list []
+  set network-list-class []
   ;; create a turtle on NUMBER randomly selected patches.
   ;; note that slider's maximum value is 5800 which is a little less than the total number of patches,
   ;; which is 6400
@@ -61,15 +63,21 @@ to setup
 
   ; counting members of the networks needs the networks to already be established
   ask turtles [
-    let friends count link-neighbors
-    set network-list fput friends network-list]
+    let all-friends count link-neighbors
+    set network-list fput all-friends network-list
+    let friends-other-class count link-neighbors with [class != [class] of myself]
+    set network-list-class fput friends-other-class network-list-class
+  ]
 
   set-current-plot "number of turtles in network"
+  set-plot-x-range (min network-list-class) (max network-list-class)
+  set-plot-pen-color black
   set-plot-pen-mode 1
-  set-plot-x-range (min network-list) (max network-list)
-  ;set-plot-y-range 0 100
   histogram network-list
-  ; set-histogram-num-bars 100
+;  set-current-plot-pen classes
+;  set-plot-pen-mode 1
+;  set-plot-pen-color green
+;  histogram network-list-class
 
   ask links [
     set hidden? hide-links?] ; displaying links is quite messy
@@ -224,13 +232,13 @@ to update-globals
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-277
+264
 12
-890
-626
+818
+567
 -1
 -1
-8.902
+8.033
 1
 10
 1
@@ -317,7 +325,7 @@ number
 number
 100
 count patches
-3400.0
+2400.0
 100
 1
 NIL
@@ -375,10 +383,10 @@ NIL
 1
 
 PLOT
-899
-35
-1099
-185
+818
+12
+1018
+162
 House prices
 NIL
 NIL
@@ -393,10 +401,10 @@ PENS
 "default" 1.0 0 -10899396 true "" ""
 
 PLOT
-899
-185
-1099
-335
+818
+162
+1018
+312
 Incomes
 NIL
 NIL
@@ -411,10 +419,10 @@ PENS
 "default" 1.0 1 -5825686 true "" ""
 
 PLOT
-1102
-366
-1302
-486
+1020
+343
+1220
+463
 Rooms
 NIL
 NIL
@@ -429,10 +437,10 @@ PENS
 "default" 1.0 0 -2674135 true "" ""
 
 PLOT
-899
-335
-1099
-485
+818
+312
+1018
+462
 Wealth distr
 NIL
 NIL
@@ -447,10 +455,10 @@ PENS
 "default" 1.0 0 -11221820 true "" ""
 
 PLOT
-1102
-36
-1302
-186
+1020
+13
+1220
+163
 turtles that moved
 NIL
 NIL
@@ -465,10 +473,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count turtles with [just-moved? = 1]"
 
 MONITOR
-1102
-186
-1302
-231
+1020
+163
+1220
+208
 Turtles that moved
 count turtles with [just-moved? = 1]
 0
@@ -476,10 +484,10 @@ count turtles with [just-moved? = 1]
 11
 
 MONITOR
-1102
-232
-1302
-277
+1020
+208
+1220
+253
 Working class turtles that moved
 count turtles with [just-moved? = 1 and class = \"working class\"]
 0
@@ -487,10 +495,10 @@ count turtles with [just-moved? = 1 and class = \"working class\"]
 11
 
 MONITOR
-1102
-276
-1302
-321
+1020
+253
+1220
+298
 Middle class turtles that moved
 count turtles with [just-moved? = 1 and class = \"middle class\"]
 0
@@ -498,10 +506,10 @@ count turtles with [just-moved? = 1 and class = \"middle class\"]
 11
 
 MONITOR
-1102
-322
-1302
-367
+1020
+298
+1220
+343
 Upper class turtles that moved
 count turtles with [just-moved? = 1 and class = \"upper class\"]
 0
@@ -520,10 +528,10 @@ hide-links?
 -1000
 
 PLOT
-1302
-36
-1552
-230
+1220
+13
+1470
+207
 number of turtles in network
 NIL
 NIL
@@ -535,7 +543,8 @@ true
 false
 "" ""
 PENS
-"default" 1.0 1 -16777216 true "" ""
+"all-friends" 1.0 1 -16777216 true "" ""
+"classes" 1.0 1 -7500403 true "" ""
 
 @#$#@#$#@
 ## ACKNOWLEDGMENT

@@ -6,6 +6,7 @@ globals [
   percent-cannot-afford  ;; on the average, what percent of a turtle's neighbors
                    ;; are the same color as that turtle?
   percent-unhappy  ;; what percent of the turtles are unhappy?
+  network-list     ;; collects the number of turtles that are in each turtle's network
 ]
 
 turtles-own [
@@ -33,6 +34,7 @@ patches-own [
 to setup
   clear-all
   reset-ticks
+  set network-list []
   ;; create a turtle on NUMBER randomly selected patches.
   ;; note that slider's maximum value is 5800 which is a little less than the total number of patches,
   ;; which is 6400
@@ -42,8 +44,8 @@ to setup
 
   ask turtles [
     ;; set initial characteristics of the households
-    set color one-of [yellow orange red]
-    class-assignment
+    set color one-of [yellow green red]
+    class-assignment ; assigns class
     set adults one-of [1 2]
     set kids one-of [0 1 2 3 4 5]
     set members (adults + kids)
@@ -53,10 +55,29 @@ to setup
     set size 0.5
   ]
 
+  ; social network creation needs to be done after all the turtles have been assigned a class
+  ask turtles [
+    create-social-network] ; create social network mainly of turtles of same class
+
+  ; counting members of the networks needs the networks to already be established
+  ask turtles [
+    let friends count link-neighbors
+    set network-list fput friends network-list]
+
+  set-current-plot "number of turtles in network"
+  set-plot-pen-mode 1
+  set-plot-x-range (min network-list) (max network-list)
+  ;set-plot-y-range 0 100
+  histogram network-list
+  ; set-histogram-num-bars 100
+
+  ask links [
+    set hidden? hide-links?] ; displaying links is quite messy
+
   ask patches [
     set rooms one-of [1 2 3 4 5 6 7]
     set dimension (rooms * (random 5 + 5))
-    set price-sqm ((random-gamma 9 6) * 11)
+    set price-sqm ((random-gamma 9 6) * 10)
   ]
 
   ;; calls the function price_clustering, which determines the geographical distribution of house prices
@@ -65,14 +86,17 @@ to setup
   update-turtles
   ;; updates global variables
   update-globals
-  reset-ticks
+  plot-house-prices
+  plot-incomes
+  plot-rooms
+  plot-wealth
 end
 
 to class-assignment
   ;assigns class based on color
   if color = yellow [
       set class "working class"]
-    if color = orange [
+    if color = green [
       set class "middle class"]
     if color = red [
       set class "upper class"]
@@ -82,12 +106,25 @@ to set-income-and-wealth
   if color = yellow [
     set income ((random-gamma 9 6) * 400 * [adults] of self)
     set wealth round (random-gamma 9 6) * 300 ]
-    if color = orange [
+    if color = green [
       set income ((random-gamma 9 6) * 800 * [adults] of self)
       set wealth round (random-gamma 9 6) * 650 ]
     if color = red [
       set income ((random-gamma 9 6) * 1200 * [adults] of self)
       set wealth round (random-gamma 9 6) * 1000 ]
+end
+
+to create-social-network
+  create-links-with n-of 3 other turtles with [
+    class = [class] of myself
+  ][
+    set color blue]
+  if random 100 < 60 [ ; 60% probability of having friends of different class
+    create-links-with n-of 1 other turtles with [
+      class != [class] of myself
+    ][
+      set color yellow]
+  ]
 end
 
 to go
@@ -100,6 +137,8 @@ to go
   plot-incomes
   plot-rooms
   plot-wealth
+  ask links [
+    set hidden? hide-links?]
   tick
 end
 ;
@@ -127,13 +166,13 @@ to update-turtles
     ;; move if better can be afforded
     let score-here 50  ; arbitrarily assigned value if the house can be afforded
     ifelse [rooms] of patch-here >= members [ ; check number of rooms
-      set score-here (score-here + 10)][ ; positive if there is enough place
+      set score-here (score-here + 5 * ([rooms] of patch-here - members))][ ; positive if there is enough place
       set score-here (score-here - 10)]  ; negative if not enough place, but still ok to move
     let distance-from-center distancexy 0 0 ; the closest the house is to the center, the better
     set score-here (score-here + (max-pxcor - distance-from-center))
     set score-here score-here * [district-markup] of patch-here
 
-    if score-here < 90 and [rent-price] of patch-here < 0.5 * (income + 0.1 * wealth) [
+    if score-here < 90 and [rent-price] of patch-here < 0.6 * (income + 0.1 * wealth) [
       ;; the household must be significantly rich to be unhappy
       set happy? False]
 
@@ -185,13 +224,13 @@ to update-globals
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-275
-10
-768
-504
+277
+12
+890
+626
 -1
 -1
-11.83
+8.902
 1
 10
 1
@@ -201,10 +240,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--20
-20
--20
-20
+-30
+30
+-30
+30
 1
 1
 1
@@ -276,9 +315,9 @@ SLIDER
 88
 number
 number
-1000
+100
 count patches
-1600.0
+3400.0
 100
 1
 NIL
@@ -336,10 +375,10 @@ NIL
 1
 
 PLOT
-790
-30
-990
-180
+899
+35
+1099
+185
 House prices
 NIL
 NIL
@@ -354,10 +393,10 @@ PENS
 "default" 1.0 0 -10899396 true "" ""
 
 PLOT
-790
-180
-990
-330
+899
+185
+1099
+335
 Incomes
 NIL
 NIL
@@ -372,10 +411,10 @@ PENS
 "default" 1.0 1 -5825686 true "" ""
 
 PLOT
-995
-360
-1195
-480
+1102
+366
+1302
+486
 Rooms
 NIL
 NIL
@@ -390,10 +429,10 @@ PENS
 "default" 1.0 0 -2674135 true "" ""
 
 PLOT
-790
-330
-990
-480
+899
+335
+1099
+485
 Wealth distr
 NIL
 NIL
@@ -408,10 +447,10 @@ PENS
 "default" 1.0 0 -11221820 true "" ""
 
 PLOT
-995
-30
-1195
-180
+1102
+36
+1302
+186
 turtles that moved
 NIL
 NIL
@@ -426,10 +465,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count turtles with [just-moved? = 1]"
 
 MONITOR
-995
-180
-1195
-225
+1102
+186
+1302
+231
 Turtles that moved
 count turtles with [just-moved? = 1]
 0
@@ -437,10 +476,10 @@ count turtles with [just-moved? = 1]
 11
 
 MONITOR
-995
-225
-1195
-270
+1102
+232
+1302
+277
 Working class turtles that moved
 count turtles with [just-moved? = 1 and class = \"working class\"]
 0
@@ -448,10 +487,10 @@ count turtles with [just-moved? = 1 and class = \"working class\"]
 11
 
 MONITOR
-995
-270
-1195
-315
+1102
+276
+1302
+321
 Middle class turtles that moved
 count turtles with [just-moved? = 1 and class = \"middle class\"]
 0
@@ -459,15 +498,44 @@ count turtles with [just-moved? = 1 and class = \"middle class\"]
 11
 
 MONITOR
-995
-315
-1195
-360
+1102
+322
+1302
+367
 Upper class turtles that moved
 count turtles with [just-moved? = 1 and class = \"upper class\"]
 0
 1
 11
+
+SWITCH
+17
+93
+129
+126
+hide-links?
+hide-links?
+0
+1
+-1000
+
+PLOT
+1302
+36
+1552
+230
+number of turtles in network
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 1 -16777216 true "" ""
 
 @#$#@#$#@
 ## ACKNOWLEDGMENT

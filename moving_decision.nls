@@ -9,9 +9,10 @@ to find-new-spot
   
   let i 1
   
-  while [i <= 10][
+  while [i <= 5][
+    move-to one-of link-neighbors ; now the turtles search around their network contacts
     rt random-float 360
-    let steps random-float 30
+    let steps random-float 8 + 1
     fd steps
     if not any? other turtles-here [ ;; if the house is empty, then it gets considered
       ifelse [rent-price] of patch-here > (income + 0.1 * wealth) [ ; if the house cannot be afforded, look elsewhere
@@ -19,7 +20,7 @@ to find-new-spot
         let score-here 50  ; arbitrarily assigned value if the house can be afforded
         
         ifelse [rooms] of patch-here >= members [ ; check number of rooms
-          set score-here (score-here + 10)][ ; positive if there is enough place
+          set score-here (score-here + 5 * ([rooms] of patch-here - members))][ ; positive if there is enough place
           set score-here (score-here - 10)]  ; negative if not enough place, but still ok to move
         
         let distance-from-center distancexy 0 0 ; the closest the house is to the center, the better
@@ -32,7 +33,7 @@ to find-new-spot
       set xcor-aim lput (pxcor) xcor-aim
       set ycor-aim lput (pycor) ycor-aim
       set i (i + 1)
-      fd (0 - steps) ; send them back a bit in the direction the turtles came from
+      ; fd (0 - steps) ; send them back a bit in the direction the turtles came from
       ]
   ]
   

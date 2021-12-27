@@ -35,7 +35,7 @@ to price-clustering
     ]
  
     ; set rent price by interaxting all the possible markups
-    set rent-price (dimension * price-sqm * distance-markup * perif-markup * district-markup)
+    set rent-price round (dimension * price-sqm * distance-markup * perif-markup * district-markup)
     
     ; set the colours based on the rent-price
     set pcolor scale-color violet rent-price (max[rent-price] of patches) (min[rent-price] of patches)

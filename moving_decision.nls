@@ -2,39 +2,81 @@
 ;; In the current specification, turtles choose 5 random houses around them and 
 ;; pick the one that better matches their preferences
 
+
+to calculate-own-house-score
+  
+  ifelse [rooms] of patch-here >= members [ ; check number of rooms
+    set own-score (10 + 5 * ([rooms] of patch-here - members))][ ; positive if there is enough place
+    set own-score (10 - 10)]  ; negative if not enough place, but still ok to move
+      
+    let distance-from-center distancexy 0 0 ; the closest the house is to the center, the better
+      
+    let least-distant-service min-one-of services [distance myself] ; the closest services point to the house
+    let distance-from-service distance least-distant-service ; calculates the distance to the closest services point
+      
+    let least-distant-green min-one-of greeneries [distance myself] ; the closest services point to the house
+    let distance-from-green distance least-distant-green ; calculates the distance to the closest green spot
+      
+    set own-score (own-score + 0.5 * distance-preference * (max-pxcor - distance-from-center) +
+       services-preference * (15 - distance-from-service) + green-preference * (15 - distance-from-green))
+      
+    set own-score own-score * [district-markup] of patch-here
+  
+end
+
+
 to find-new-spot
-  let scores []
+  
+  set scores []
   let xcor-aim []
   let ycor-aim []
   
   let i 1
+  let t 2
   
-  while [i <= 5][
-    move-to one-of link-neighbors ; now the turtles search around their network contacts
-    rt random-float 360
-    let steps random-float 8 + 1
-    fd steps
-    if not any? other turtles-here [ ;; if the house is empty, then it gets considered
-      ifelse [rent-price] of patch-here > (income + 0.1 * wealth) [ ; if the house cannot be afforded, look elsewhere
-        set scores lput 0 scores][
-        let score-here 50  ; arbitrarily assigned value if the house can be afforded
-        
-        ifelse [rooms] of patch-here >= members [ ; check number of rooms
-          set score-here (score-here + 5 * ([rooms] of patch-here - members))][ ; positive if there is enough place
-          set score-here (score-here - 10)]  ; negative if not enough place, but still ok to move
-        
-        let distance-from-center distancexy 0 0 ; the closest the house is to the center, the better
-        set score-here (score-here + (max-pxcor - distance-from-center))
-        
-        set score-here score-here * [district-markup] of patch-here
-        
-        set scores lput score-here scores]
+  while [t <= 5 ] [
+    while [i <= 8][
+      if random 100 < reliance-on-network [
+        move-to one-of link-neighbors] ; now the households search 70% of the time around their network contacts
+      rt random-float 360
+      let steps random-float 10 + 1
+      fd steps
       
-      set xcor-aim lput (pxcor) xcor-aim
-      set ycor-aim lput (pycor) ycor-aim
-      set i (i + 1)
-      ; fd (0 - steps) ; send them back a bit in the direction the turtles came from
-      ]
+      if not any? other turtles-here [ ;; if the house is empty, then it gets considered
+       ifelse [rent-price] of patch-here > (income + 0.1 * wealth) [ ; if the house cannot be afforded, look elsewhere
+         set scores lput 0 scores][
+         let score-here 10  ; arbitrarily assigned value if the house can be afforded
+         
+         ifelse [rooms] of patch-here >= members [ ; check number of rooms
+           set score-here (score-here + 5 * ([rooms] of patch-here - members))][ ; positive if there is enough place
+           set score-here (score-here - 10)]  ; negative if not enough place, but still ok to move
+         
+         let distance-from-center distancexy 0 0 ; the closest the house is to the center, the better
+         
+         let least-distant-services min-one-of services [distance myself] ; the closest services point to the house
+         let distance-from-services distance least-distant-services ; calculates the distance to the closest services point
+         
+         let least-distant-green min-one-of greeneries [distance myself] ; the closest services point to the house
+         let distance-from-green distance least-distant-green ; calculates the distance to the closest green spot
+         
+         set score-here (score-here + 0.5 * distance-preference * (max-pxcor - distance-from-center) + 
+            services-preference * (15 - distance-from-services) + green-preference * (15 - distance-from-green))
+         
+         set score-here score-here * [district-markup] of patch-here
+         
+         set scores lput score-here scores]
+       
+       set xcor-aim lput (pxcor) xcor-aim
+       set ycor-aim lput (pycor) ycor-aim
+       set i (i + 1)
+       ]
+    ]
+    
+    let max-score max scores  ;; choose the house with the highest score. 
+    ifelse max-score > 0 [ ;if the highest score is zero, repeat the procedure
+     set looped t
+     set t 6][ ; setting t to 6 stops the loop. The procedure can be repeated maximum 5 times, for computational reasons
+     set t (t + 1)]
   ]
   
   let max-score max scores  ;; choose the house with the highest score. 
@@ -42,3 +84,4 @@ to find-new-spot
   
   setxy (item index xcor-aim) (item index ycor-aim)
 end
+

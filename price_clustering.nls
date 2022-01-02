@@ -8,7 +8,7 @@ to price-clustering
   
   set city-border (max-pxcor)
   
-  ask patches [
+  ask patches with [pcolor = black] [
     ; first, compute distance from the center - arguably an important factor in determining house prices
     let distance-from-center distancexy 0 0 
     let distance-markup (2 * (1 + (1 - (distance-from-center / max-pxcor))))

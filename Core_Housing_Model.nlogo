@@ -41,6 +41,7 @@ patches-own [
   rent-price      ;; cost of monthly rent for the whole house
   perif-markup
   district-markup
+  socialhousing-markup
 ]
 
 
@@ -73,11 +74,20 @@ to setup
     set just-moved? 0
     set shape "circle"
     set size 0.5
+    set socialhousing-markup 1
   ]
 
   ; social network creation needs to be done after all the turtles have been assigned a class
   ask households [
     create-social-network] ; create social network mainly of turtles of same class
+
+  ; create household patches as social housing
+  ; put lower prices for these patches by setting a social housing markup at 0.5
+  ; add access rules
+  ask n-of number-socialhousing households [
+    set socialhousing-markup 0.5
+    set pcolor 125 ]
+
 
   ask links [
     set hidden? hide-links?] ; displaying links is quite messy
@@ -516,7 +526,7 @@ reliance-on-network
 reliance-on-network
 0
 100
-81.0
+25.0
 1
 1
 NIL
@@ -539,6 +549,21 @@ false
 "" ""
 PENS
 "default" 1.0 1 -16777216 true "" "histogram [own-score] of households"
+
+SLIDER
+15
+110
+187
+143
+number-socialhousing
+number-socialhousing
+0
+100
+1.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## ACKNOWLEDGMENT
@@ -921,7 +946,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.2.0
+NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@

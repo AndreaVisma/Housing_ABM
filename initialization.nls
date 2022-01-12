@@ -1,0 +1,65 @@
+;; generate public services and green areas in the city
+
+to class-assignment
+  set color one-of [yellow green red]
+  ;assigns class based on color
+  if color = yellow [
+      set class "working class"
+      set income ((random-gamma 9 6) * 400 * [adults] of self)
+      set wealth round ((random-gamma 9 6) * 300)
+      set minimum-score 25]
+    if color = green [
+      set class "middle class"
+      set income ((random-gamma 9 6) * 800 * [adults] of self)
+      set wealth round ((random-gamma 9 6) * 650) 
+      set minimum-score 35]
+    if color = red [
+      set class "upper class"
+      set income ((random-gamma 9 6) * 1200 * [adults] of self)
+      set wealth round ((random-gamma 9 6) * 1000) 
+      set minimum-score 50]
+end
+
+to create-social-network
+  create-links-with n-of 3 other households with [
+    class = [class] of myself
+  ][
+    set color blue]
+  if random 100 < 60 [ ; 60% probability of having friends of different class
+    create-links-with n-of 1 other households with [
+      class != [class] of myself
+    ][
+      set color yellow]
+  ]
+end
+
+to services-and-greenery
+  
+  ask n-of (0.01 * count patches) patches [
+    set pcolor green
+    sprout 1 [
+      set breed services
+      set shape "house"
+      set color black
+    ]
+  ]
+  
+  ask n-of (0.01 * count patches) patches with [pcolor = black] [
+    set pcolor green
+    sprout 1 [
+      set breed greeneries
+      set shape "leaf"
+      set color black
+    ]
+    ask n-of (random 1) neighbors [
+      set pcolor green
+      sprout 1 [
+        set breed greeneries
+        set shape "leaf"
+        set color black
+    ]
+    ] 
+  ]
+  
+  
+end

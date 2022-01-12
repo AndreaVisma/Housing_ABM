@@ -1,12 +1,21 @@
-__includes ["price_clustering.nls"]
+__includes ["price_clustering.nls"
+            "moving_decision.nls"
+            "plots.nls"
+            "initialization.nls"]
 
 globals [
   percent-cannot-afford  ;; on the average, what percent of a turtle's neighbors
                    ;; are the same color as that turtle?
   percent-unhappy  ;; what percent of the turtles are unhappy?
+  network-list     ;; collects the number of turtles that are in each turtle's network
+  network-list-class ;; collects the number of turtles that are in each turtle's network which are not the same class
 ]
 
-turtles-own [
+breed [services service]
+breed [greeneries greenery]
+breed [households household]
+
+households-own [
   happy?          ;; for each household, indicates if they want to stay in their current housing situation
   cannot-afford?  ;; for each household, indicates if they can afford their current house
   adults          ;; how many adults in the household
@@ -14,39 +23,78 @@ turtles-own [
   members         ;; total number of people in the household
   class           ;; indicates the class to which the household belongs. Key determinant of income dynamics
   income          ;; indicates the income per period accrued by the family
+  wealth          ;; a pot of wealth that gets accumulated using unspent incomes
+  just-moved?     ;; set to 1 if the turtle has just moved
+  scores          ;; keeps track of the scores given to the houses in the last choice
+  own-score       ;; score given to their current house
+  distance-preference ;; between 0 and 1, randomly assigned
+  services-preference ;; between 0 and 1, randomly assigned
+  green-preference    ;; between 0 and 1, randomly assigned+
+  minimum-score   ;; minimum attractiveness of the current households required to stay there
+  looped          ;; control variable
 ]
 
 patches-own [
   rooms           ;; the number of rooms in the house
-  dimension ;; size of the house in square meters
+  dimension       ;; size of the house in square meters
   price-sqm       ;; price of each square metre
   rent-price      ;; cost of monthly rent for the whole house
   perif-markup
+  district-markup
+  socialhousing-markup
 ]
 
 
 to setup
   clear-all
+  reset-ticks
+  set network-list []
+  set network-list-class []
   ;; create a turtle on NUMBER randomly selected patches.
   ;; note that slider's maximum value is 5800 which is a little less than the total number of patches,
   ;; which is 6400
-  ask n-of number patches [
-    sprout 1
+
+  services-and-greenery
+
+  ask n-of number patches with [pcolor = black] [
+    sprout 1 [
+      set breed households
+    ]
   ]
 
-  ask turtles [
+  ask households [
     ;; set initial characteristics of the households
-    set color one-of [yellow orange red]
-    class-assignment
     set adults one-of [1 2]
     set kids one-of [0 1 2 3 4 5]
     set members (adults + kids)
-    set-income ;important that this happens after the number of adults has been set
+    class-assignment ; assigns class, income and wealth
+    set distance-preference random-float 0.33 + 0.33
+    set services-preference random-float 0.5 + 0.5
+    set green-preference random-float 0.5 + 0.5
+    set just-moved? 0
     set shape "circle"
     set size 0.5
+    set socialhousing-markup 1
   ]
 
-  ask patches [
+  ; social network creation needs to be done after all the turtles have been assigned a class
+  ask households [
+    create-social-network] ; create social network mainly of turtles of same class
+
+  ; create household patches as social housing
+  ; put lower prices for these patches by setting a social housing markup at 0.5
+  ; add access rules
+  ask n-of number-socialhousing households [
+    set socialhousing-markup 0.5
+    set pcolor 125 ]
+
+
+  ask links [
+    set hidden? hide-links?] ; displaying links is quite messy
+
+  plot-network-connections
+
+  ask patches with [pcolor != green] [
     set rooms one-of [1 2 3 4 5 6 7]
     set dimension (rooms * (random 5 + 5))
     set price-sqm ((random-gamma 9 6) * 10)
@@ -55,69 +103,61 @@ to setup
   ;; calls the function price_clustering, which determines the geographical distribution of house prices
   price-clustering
   ;; updates turtles
-  update-turtles
+  update-households
   ;; updates global variables
-  update-globals
-  reset-ticks
-end
-
-to class-assignment
-  ;assigns class based on color
-  if color = yellow [
-      set class "working class"]
-    if color = orange [
-      set class "middle class"]
-    if color = red [
-      set class "upper class"]
-end
-
-to set-income
-  if color = yellow [
-    set income ((random-gamma 9 6) * 400 * [adults] of self)]
-    if color = orange [
-      set income ((random-gamma 9 6) * 800 * [adults] of self)]
-    if color = red [
-      set income ((random-gamma 9 6) * 1200 * [adults] of self)]
-end
-
-to go
-  ;if all? turtles [ happy? ] [ stop ]
-  move-unhappy-turtles
-  update-houses
-  update-turtles
   update-globals
   plot-house-prices
   plot-incomes
   plot-rooms
+  plot-wealth
+  plot-own-score
+end
+
+to go
+  ;if all? turtles [ happy? ] [ stop ]
+  move-turtles
+  update-houses
+  update-households
+  update-globals
+  plot-house-prices
+  plot-incomes
+  plot-rooms
+  plot-wealth
+  plot-own-score
+  ask links [
+    set hidden? hide-links?]
   tick
 end
 ;
-to move-unhappy-turtles
-  ask turtles with [ not happy? ]
-    [ find-new-spot ]
+
+to move-turtles
+  ask households with [ not happy? ]
+    [ find-new-spot   ; now in separate nls file
+      set just-moved? 1]
+  ask households with [ happy? ]
+  [ set just-moved? 0 ]
 end
 
-to find-new-spot
-  rt random-float 360
-  fd random-float 10
-  if any? other turtles-here
-    [ find-new-spot ]          ;; keep going until we find an unoccupied patch
-  setxy pxcor pycor  ;; move to center of patch
-end
-
-to update-turtles
-  ask turtles [
+to update-households
+  ask households [
     ; this line checks if there's enough room for the family in the current house they're at
-    ifelse [rooms] of patch-here >= members[
-      set happy? True][
-      set happy? False]
-    ifelse [rent-price] of patch-here > income [
+;    ifelse [rooms] of patch-here >= members[
+;      set happy? True][
+;      set happy? False]
+    ifelse [rent-price] of patch-here > (income + 0.1 * wealth) [ ; house can be paid for using wealth pot
       set happy? False
       set cannot-afford? True][
-      set cannot-afford? False]
+      set cannot-afford? False
+      calculate-own-house-score
+      ifelse own-score < minimum-score ;0.9 * (mean [own-score] of link-neighbors) ;; the household compares the attractiveness of their house to those of the households in their network
+      and [rent-price] of patch-here < 0.7 * (income + 0.1 * wealth) [ ;; the household must be significantly rich to be unhappy
+      set happy? False][
+      set happy? True]
+    ]
+
     ; the next command is used to update the income of the household
     let income_past income
-    set income round(income_past + 0.003 * mean([income] of turtles in-radius 3))
+    set income round(income_past + 0.003 * mean([income] of households in-radius 3))
     ;grow the number of rooms in the house if really rich
     if [rooms] of patch-here < members and (([rent-price] of patch-here) * 3) < income[
       ask patch-here[
@@ -125,24 +165,30 @@ to update-turtles
       set rooms (old_rooms + 1)
       ]
     ]
+    if ticks > 8 [ ; doesn't run for the first periods to ensure not too many households end up with zero wealth
+    ifelse income - [rent-price] of patch-here < 0 [
+      set wealth max list 0 round (wealth + (income - [rent-price] of patch-here))]
+    [ set wealth max list 0 round (wealth + 0.13 * (income - [rent-price] of patch-here))] ; from average savings rates:
+      ; https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Households_-_statistics_on_disposable_income,_saving_and_investment
+  ]
   ]
 end
 
 to update-houses
   ;;increases the price of the house based on the price of neighbouring houses and the income of their occupants
-  ask patches[
+  ask patches with [pcolor != green][
     let old-price rent-price
     let avg-price mean ([rent-price] of neighbors)
     ; if there's no turtles around the house, set the average income to the global average of incomes
     ifelse any? turtles-on neighbors[
-      let avg-income mean ([income] of turtles-on neighbors)
+      let avg-income mean ([income] of households in-radius 2)
       set rent-price round(old-price + 0.003 * avg-price) ; could also include a factor for the average income of turtles around
     ][
-      let avg-income mean ([income] of turtles)
+      let avg-income mean ([income] of households)
       set rent-price round(old-price + 0.003 * avg-price) ; could also include a factor for the average income of turtles around
     ]
      if ticks mod 20 = 0[
-      set pcolor scale-color green rent-price (max[rent-price] of patches) (min[rent-price] of patches)
+      set pcolor scale-color violet rent-price (max[rent-price] of patches) (min[rent-price] of patches)
      ;; this command here is suuper useful to see the clustering in house prices. However, having it run at
      ;; every period makes the simulation really slow
     ]
@@ -152,46 +198,18 @@ end
 to update-globals
 ;  let similar-neighbors sum [similar-nearby] of turtles
 ;  let total-neighbors sum [total-nearby] of turtles
-  set percent-cannot-afford (count turtles with [cannot-afford?]) / (count turtles) * 100
-  set percent-unhappy (count turtles with [not happy?]) / (count turtles) * 100
+  set percent-cannot-afford (count households with [cannot-afford?]) / (count households) * 100
+  set percent-unhappy (count households with [not happy?]) / (count households) * 100
 end
-;
-to plot-house-prices
-  set-current-plot "House prices"
-  set-plot-pen-mode 1
-  set-plot-x-range (min[rent-price] of patches) (max[rent-price] of patches)
-  ;set-plot-y-range 0 100
-  histogram [rent-price] of patches
-  set-histogram-num-bars 100
-end
-
-to plot-incomes
-  set-current-plot "Incomes"
-  set-plot-pen-mode 1
-  set-plot-x-range (min[income] of turtles) (max[income] of turtles)
-  ;set-plot-y-range 0 100
-  histogram [income] of turtles
-  set-histogram-num-bars 100
-end
-
-to plot-rooms
-  set-current-plot "Rooms"
-  set-plot-pen-mode 1
-  set-plot-x-range 0 8
-  histogram [rooms] of patches
-end
-;
-;; Copyright 2006 Uri Wilensky.
-;; See Info tab for full copyright and license.
 @#$#@#$#@
 GRAPHICS-WINDOW
-275
+260
 10
-769
-505
+748
+499
 -1
 -1
-8.0
+11.71
 1
 10
 1
@@ -201,10 +219,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--30
-30
--30
-30
+-20
+20
+-20
+20
 1
 1
 1
@@ -271,15 +289,15 @@ PENS
 
 SLIDER
 15
-55
-240
-88
+45
+260
+78
 number
 number
-1000
-4000
-3610.0
-10
+100
+count patches
+1600.0
+100
 1
 NIL
 HORIZONTAL
@@ -336,10 +354,10 @@ NIL
 1
 
 PLOT
-790
-30
-990
-180
+765
+15
+965
+165
 House prices
 NIL
 NIL
@@ -354,10 +372,10 @@ PENS
 "default" 1.0 0 -10899396 true "" ""
 
 PLOT
-790
-180
-990
-330
+765
+165
+965
+315
 Incomes
 NIL
 NIL
@@ -372,10 +390,10 @@ PENS
 "default" 1.0 1 -5825686 true "" ""
 
 PLOT
-790
-330
-990
-480
+967
+346
+1167
+466
 Rooms
 NIL
 NIL
@@ -388,6 +406,164 @@ false
 "" ""
 PENS
 "default" 1.0 0 -2674135 true "" ""
+
+PLOT
+765
+315
+965
+465
+Wealth distr
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -11221820 true "" ""
+
+PLOT
+967
+16
+1167
+166
+turtles that moved
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count households with [just-moved? = 1]"
+
+MONITOR
+967
+166
+1167
+211
+Turtles that moved
+count households with [just-moved? = 1]
+0
+1
+11
+
+MONITOR
+967
+211
+1167
+256
+Working class turtles that moved
+count households with [just-moved? = 1 and class = \"working class\"]
+0
+1
+11
+
+MONITOR
+967
+256
+1167
+301
+Middle class turtles that moved
+count households with [just-moved? = 1 and class = \"middle class\"]
+0
+1
+11
+
+MONITOR
+967
+301
+1167
+346
+Upper class turtles that moved
+count households with [just-moved? = 1 and class = \"upper class\"]
+0
+1
+11
+
+SWITCH
+15
+80
+115
+113
+hide-links?
+hide-links?
+0
+1
+-1000
+
+PLOT
+1167
+16
+1417
+210
+number of turtles in network
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"all-friends" 1.0 1 -16777216 true "" ""
+"classes" 1.0 1 -7500403 true "" ""
+
+SLIDER
+115
+80
+260
+113
+reliance-on-network
+reliance-on-network
+0
+100
+25.0
+1
+1
+NIL
+HORIZONTAL
+
+PLOT
+1165
+210
+1420
+405
+Own scores
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 1 -16777216 true "" "histogram [own-score] of households"
+
+SLIDER
+15
+110
+187
+143
+number-socialhousing
+number-socialhousing
+0
+100
+1.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## ACKNOWLEDGMENT
@@ -770,7 +946,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.2.0
+NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@

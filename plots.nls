@@ -1,0 +1,67 @@
+;; collects all the plotting procedures
+
+to plot-house-prices
+  set-current-plot "House prices"
+  set-plot-pen-mode 1
+  set-plot-x-range (min[rent-price] of patches with [pcolor != green]) (max[rent-price] of patches with [pcolor != green])
+  ;set-plot-y-range 0 100
+  histogram [rent-price] of patches
+  set-histogram-num-bars 100
+end
+
+to plot-incomes
+  set-current-plot "Incomes"
+  set-plot-pen-mode 1
+  set-plot-x-range (min[income] of households) (max[income] of households)
+  ;set-plot-y-range 0 100
+  histogram [income] of households
+  set-histogram-num-bars 100
+end
+
+to plot-wealth
+  set-current-plot "Wealth distr"
+  set-plot-pen-mode 1
+  set-plot-x-range (min[wealth] of households) (max[wealth] of households)
+  ;set-plot-y-range 0 100
+  histogram [wealth] of households
+  set-histogram-num-bars 100
+end
+
+to plot-rooms
+  set-current-plot "Rooms"
+  set-plot-pen-mode 1
+  set-plot-x-range 0 8
+  histogram [rooms] of patches with [pcolor != green]
+end
+
+to plot-network-connections
+  
+  ; counting members of the networks needs the networks to already be established
+  ask households [
+    let all-friends count link-neighbors
+    set network-list fput all-friends network-list
+    let friends-other-class count link-neighbors with [class != [class] of myself]
+    set network-list-class fput friends-other-class network-list-class
+  ]
+
+  set-current-plot "number of turtles in network"
+  set-plot-x-range 0 (max network-list)
+  set-plot-pen-color black
+  set-plot-pen-mode 1
+  histogram network-list
+;  set-current-plot-pen classes
+;  set-plot-pen-mode 1
+;  set-plot-pen-color green
+;  histogram network-list-class
+  
+end
+
+to plot-own-score
+  set-current-plot "Own scores"
+  set-plot-pen-mode 1
+  set-plot-x-range 0 (max[own-score] of households)
+  set-plot-y-range 0 70
+  ;set-plot-y-range 0 100
+  set-histogram-num-bars 40
+  histogram [own-score] of households
+end

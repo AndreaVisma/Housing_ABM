@@ -35,6 +35,8 @@ end
 
 to services-and-greenery
   
+  random-seed 121 ;allows to always have the same pseudo-random distribution of greeneries and services
+  
   ask n-of (0.01 * count patches) patches [
     set pcolor green
     sprout 1 [
@@ -61,5 +63,6 @@ to services-and-greenery
     ] 
   ]
   
+  random-seed new-seed ;this is based on current time and is always different
   
 end

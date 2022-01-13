@@ -11,9 +11,10 @@ globals [
   network-list-class ;; collects the number of turtles that are in each turtle's network which are not the same class
 ]
 
-breed [services service]
-breed [greeneries greenery]
-breed [households household]
+breed [services service] ; this is to indicate which patches host services
+breed [greeneries greenery] ; this is to indicate which patches are green areas
+
+breed [households household] ; these are the families that move around
 
 households-own [
   happy?          ;; for each household, indicates if they want to stay in their current housing situation
@@ -39,9 +40,9 @@ patches-own [
   dimension       ;; size of the house in square meters
   price-sqm       ;; price of each square metre
   rent-price      ;; cost of monthly rent for the whole house
-  perif-markup
-  district-markup
-  socialhousing-markup
+  perif-markup    ;; indicates if houses are in the city centre or the perifery
+  district-markup ;; puts a premium depending on the district the houses are in
+  socialhousing-markup ;; decreases price if social housing
 ]
 
 
@@ -74,20 +75,11 @@ to setup
     set just-moved? 0
     set shape "circle"
     set size 0.5
-    set socialhousing-markup 1
   ]
 
   ; social network creation needs to be done after all the turtles have been assigned a class
   ask households [
     create-social-network] ; create social network mainly of turtles of same class
-
-  ; create household patches as social housing
-  ; put lower prices for these patches by setting a social housing markup at 0.5
-  ; add access rules
-  ask n-of number-socialhousing households [
-    set socialhousing-markup 0.5
-    set pcolor 125 ]
-
 
   ask links [
     set hidden? hide-links?] ; displaying links is quite messy
@@ -98,7 +90,15 @@ to setup
     set rooms one-of [1 2 3 4 5 6 7]
     set dimension (rooms * (random 5 + 5))
     set price-sqm ((random-gamma 9 6) * 10)
+    set socialhousing-markup 1
   ]
+
+  ; create house patches as social housing
+  ; put lower prices for these patches by setting a social housing markup at 0.5
+  ; add access rules
+  ask n-of number-socialhousing patches with [pcolor != green] [
+    set socialhousing-markup 0.5
+    set pcolor orange]
 
   ;; calls the function price_clustering, which determines the geographical distribution of house prices
   price-clustering
@@ -176,7 +176,7 @@ end
 
 to update-houses
   ;;increases the price of the house based on the price of neighbouring houses and the income of their occupants
-  ask patches with [pcolor != green][
+  ask patches with [pcolor != green] [
     let old-price rent-price
     let avg-price mean ([rent-price] of neighbors)
     ; if there's no turtles around the house, set the average income to the global average of incomes
@@ -187,7 +187,7 @@ to update-houses
       let avg-income mean ([income] of households)
       set rent-price round(old-price + 0.003 * avg-price) ; could also include a factor for the average income of turtles around
     ]
-     if ticks mod 20 = 0[
+     if ticks mod 20 = 0 and pcolor != orange [
       set pcolor scale-color violet rent-price (max[rent-price] of patches) (min[rent-price] of patches)
      ;; this command here is suuper useful to see the clustering in house prices. However, having it run at
      ;; every period makes the simulation really slow
@@ -231,9 +231,9 @@ ticks
 
 MONITOR
 135
-455
+465
 248
-500
+510
 Percent Unhappy
 percent-unhappy
 1
@@ -242,9 +242,9 @@ percent-unhappy
 
 MONITOR
 11
-455
+465
 128
-500
+510
 Percent cant afford
 percent-cannot-afford
 1
@@ -253,9 +253,9 @@ percent-cannot-afford
 
 PLOT
 10
-140
+150
 259
-283
+293
 Percent of households that cannot afford their house
 time
 %
@@ -271,9 +271,9 @@ PENS
 
 PLOT
 10
-285
+295
 259
-449
+459
 Percent Unhappy
 time
 %
@@ -552,14 +552,14 @@ PENS
 
 SLIDER
 15
-110
+115
 187
-143
+148
 number-socialhousing
 number-socialhousing
 0
 100
-1.0
+95.0
 1
 1
 NIL
@@ -946,7 +946,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.4
+NetLogo 6.2.2
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@

@@ -8,7 +8,7 @@ to price-clustering
   
   set city-border (max-pxcor)
   
-  ask patches with [pcolor = black] [
+  ask patches with [pcolor != green] [
     ; first, compute distance from the center - arguably an important factor in determining house prices
     let distance-from-center distancexy 0 0 
     let distance-markup (2 * (1 + (1 - (distance-from-center / max-pxcor))))
@@ -37,8 +37,9 @@ to price-clustering
     ; set rent price by interaxting all the possible markups
     set rent-price round (dimension * price-sqm * distance-markup * perif-markup * district-markup * socialhousing-markup)
     
-    ; set the colours based on the rent-price
-    set pcolor scale-color violet rent-price (max[rent-price] of patches) (min[rent-price] of patches)
+    ; if the house is private, set the colours based on the rent-price
+    if pcolor != orange [ 
+      set pcolor scale-color violet rent-price (max[rent-price] of patches) (min[rent-price] of patches)]
   ]
   
 end

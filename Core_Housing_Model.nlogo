@@ -43,6 +43,7 @@ patches-own [
   perif-markup    ;; indicates if houses are in the city centre or the perifery
   district-markup ;; puts a premium depending on the district the houses are in
   socialhousing-markup ;; decreases price if social housing
+  access          ;; list of households who can have access to this type of housing
 ]
 
 
@@ -91,14 +92,11 @@ to setup
     set dimension (rooms * (random 5 + 5))
     set price-sqm ((random-gamma 9 6) * 10)
     set socialhousing-markup 1
+    set access ["working class" "middle class" "upper class"]
   ]
 
-  ; create house patches as social housing
-  ; put lower prices for these patches by setting a social housing markup at 0.5
-  ; add access rules
-  ask n-of number-socialhousing patches with [pcolor != green] [
-    set socialhousing-markup 0.5
-    set pcolor orange]
+  if social-housing? [
+    social-housing-creation]
 
   ;; calls the function price_clustering, which determines the geographical distribution of house prices
   price-clustering
@@ -205,11 +203,11 @@ end
 GRAPHICS-WINDOW
 260
 10
-748
-499
+758
+509
 -1
 -1
-11.71
+11.95122
 1
 10
 1
@@ -526,7 +524,7 @@ reliance-on-network
 reliance-on-network
 0
 100
-25.0
+71.0
 1
 1
 NIL
@@ -558,12 +556,45 @@ SLIDER
 number-socialhousing
 number-socialhousing
 0
-100
-95.0
+0.2 * count patches
+156.0
 1
 1
 NIL
 HORIZONTAL
+
+SWITCH
+770
+470
+962
+503
+fixed-distr-social-housing
+fixed-distr-social-housing
+0
+1
+-1000
+
+SWITCH
+970
+470
+1157
+503
+clustered-social-housing
+clustered-social-housing
+0
+1
+-1000
+
+SWITCH
+1170
+470
+1307
+503
+social-housing?
+social-housing?
+0
+1
+-1000
 
 @#$#@#$#@
 ## ACKNOWLEDGMENT

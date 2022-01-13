@@ -42,7 +42,7 @@ to find-new-spot
       let steps random-float 10 + 1
       fd steps
       
-      if not any? other turtles-here [ ;; if the house is empty, then it gets considered
+      if not any? other turtles-here and member? class [access] of patch-here [ ;; if the house is empty, then it gets considered
        ifelse [rent-price] of patch-here > (income + 0.1 * wealth) [ ; if the house cannot be afforded, look elsewhere
          set scores lput 0 scores][
          let score-here 10  ; arbitrarily assigned value if the house can be afforded

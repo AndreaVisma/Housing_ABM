@@ -35,9 +35,9 @@ end
 
 to services-and-greenery
   
-  random-seed 121 ;allows to always have the same pseudo-random distribution of greeneries and services
+  random-seed 1234 ;allows to always have the same pseudo-random distribution of greeneries and services
   
-  ask n-of (0.01 * count patches) patches [
+  ask n-of (0.02 * count patches) patches [
     set pcolor green
     sprout 1 [
       set breed services
@@ -46,7 +46,7 @@ to services-and-greenery
     ]
   ]
   
-  ask n-of (0.01 * count patches) patches with [pcolor = black] [
+  ask n-of (0.02 * count patches) patches with [pcolor = black] [
     set pcolor green
     sprout 1 [
       set breed greeneries
@@ -64,5 +64,37 @@ to services-and-greenery
   ]
   
   random-seed new-seed ;this is based on current time and is always different
+  
+end
+
+to social-housing-creation
+  
+  ; create house patches as social housing
+  ; put lower prices for these patches by setting a social housing markup at 0.5
+  ; add access rules
+  ifelse clustered-social-housing [
+     if fixed-distr-social-housing [
+    random-seed 1234] ; always generates the same pseudo-random numbers: the same patches will be social housing
+    let number-clusters round(number-socialhousing / 5)
+    ask n-of number-clusters patches with [pcolor != green] [
+      set socialhousing-markup 0.5
+      set pcolor orange
+      set access ["working class"]
+      ask neighbors4 [
+        set socialhousing-markup 0.5
+        set pcolor orange
+        set access ["working class"]
+      ]
+    ]
+    random-seed new-seed ;restores the "randomness" by assigning a seed based on current datetime 
+  ][
+    if fixed-distr-social-housing [
+       random-seed 1234] ; always generates the same pseudo-random numbers: the same patches will be social housing
+    ask n-of number-socialhousing patches with [pcolor != green] [
+      set socialhousing-markup 0.5
+      set pcolor orange
+      set access "working class"]
+   random-seed new-seed ;restores the "randomness" by assigning a seed based on current datetime 
+  ]
   
 end

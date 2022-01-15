@@ -136,7 +136,7 @@ to go
   ask links [
     set hidden? hide-links?]
   segregation-output-objective
-  segregation-output-normative
+
   tick
 end
 

@@ -1,0 +1,17 @@
+;based on schelling mdoel
+;set segregation as global variables 
+; one variable for each class
+; For each agent, the number of similar agents in the neighboring patches is calculated
+;Then we take the average over all the agents in the same group. This is taken as an average measure of the segregation of each group separately
+;monitor those varibales
+
+to segregation-output
+set segregation_working mean [ count ( turtles-on neighbors ) with [ class =
+"working class" ]] of turtles with [ class = "working class" ]
+
+set segregation_middle mean [ count ( turtles-on neighbors ) with [ class =
+"middle class" ]] of turtles with [ class = "middle class" ]
+
+set segregation_upper mean [ count ( turtles-on neighbors ) with [ class =
+"upper class" ]] of turtles with [ class = "upper class" ]
+end

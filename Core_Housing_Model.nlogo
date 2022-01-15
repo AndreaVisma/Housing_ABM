@@ -159,8 +159,12 @@ to update-households
     ]
 
     ; the next command is used to update the income of the household
-    let income_past income
-    set income round(income_past + 0.003 * mean([income] of households in-radius 3))
+    let income-past income
+    ifelse income-socially-influenced? [
+      ifelse any? turtles in-radius 3 [
+      set income round(income-past + 0.003 * mean([income] of households in-radius 3))][
+        set income round(income-past + 0.003 * income-past)]]
+      [set income round(income-past + 0.003 * income-past)]
     ;grow the number of rooms in the house if really rich
     if [rooms] of patch-here < members and (([rent-price] of patch-here) * 3) < income[
       ask patch-here[
@@ -610,6 +614,17 @@ SWITCH
 463
 different-district-colours?
 different-district-colours?
+1
+1
+-1000
+
+SWITCH
+1335
+475
+1537
+508
+income-socially-influenced?
+income-socially-influenced?
 1
 1
 -1000

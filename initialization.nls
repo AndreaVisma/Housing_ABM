@@ -61,6 +61,7 @@ to services-and-greenery
       set breed greeneries
       set shape "leaf"
       set color black
+      set class "infrastructure"
     ]
     ask n-of (random 1) neighbors [
       set pcolor green
@@ -68,6 +69,7 @@ to services-and-greenery
         set breed greeneries
         set shape "leaf"
         set color black
+        set class "infrastructure"
     ]
     ] 
   ]

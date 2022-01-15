@@ -5,13 +5,35 @@
 ;Then we take the average over all the agents in the same group. This is taken as an average measure of the segregation of each group separately
 ;monitor those varibales
 
-to segregation-output
-set segregation_working mean [ count ( turtles-on neighbors ) with [ class =
-"working class" ]] of turtles with [ class = "working class" ]
+;to segregation-output
+;set segregation_working mean [ count ( turtles-on neighbors ) with [ class =
+;"working class" ]] of turtles with [ class = "working class" ]
+;
+;set segregation_middle mean [ count ( turtles-on neighbors ) with [ class =
+;"middle class" ]] of turtles with [ class = "middle class" ]
+;
+;set segregation_upper mean [ count ( turtles-on neighbors ) with [ class =
+;"upper class" ]] of turtles with [ class = "upper class" ]
+;end
 
-set segregation_middle mean [ count ( turtles-on neighbors ) with [ class =
-"middle class" ]] of turtles with [ class = "middle class" ]
+to segregation-output-normative
+  set segregation_working_norm mean [ count ( turtles-on neighbors ) with [ breed =
+  "greeneries" or breed = "services" ]] of turtles with [ class = "working class" ]
+  
+  set segregation_middle_norm mean [ count ( turtles-on neighbors ) with [ breed =
+  "greeneries" or breed = "services"]] of turtles with [ class = "middle class" ]
+  
+  set segregation_upper_norm mean [ count ( turtles-on neighbors ) with [ breed =
+  "greeneries" or breed = "services" ]] of turtles with [ class = "upper class" ]
+end
 
-set segregation_upper mean [ count ( turtles-on neighbors ) with [ class =
-"upper class" ]] of turtles with [ class = "upper class" ]
+to segregation-output-objective
+  set segregation_working_obj mean [ count ( turtles-on neighbors ) with [ class =
+  "working class" ]] of turtles with [ class = "working class" ]
+  
+  set segregation_middle_obj mean [ count ( turtles-on neighbors ) with [ class =
+  "middle class" ]] of turtles with [ class = "middle class" ]
+  
+  set segregation_upper_obj mean [ count ( turtles-on neighbors ) with [ class =
+  "upper class" ]] of turtles with [ class = "upper class" ]
 end

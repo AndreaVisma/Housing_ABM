@@ -4,6 +4,7 @@ __includes ["price_clustering.nls"
             "initialization.nls"]
 
 globals [
+  list-district-colours ;; colours for the 4 districts
   percent-cannot-afford  ;; on the average, what percent of a turtle's neighbors
                    ;; are the same color as that turtle?
   percent-unhappy  ;; what percent of the turtles are unhappy?
@@ -40,6 +41,7 @@ patches-own [
   dimension       ;; size of the house in square meters
   price-sqm       ;; price of each square metre
   rent-price      ;; cost of monthly rent for the whole house
+  district        ;; indicates the district where the patches are
   perif-markup    ;; indicates if houses are in the city centre or the perifery
   district-markup ;; puts a premium depending on the district the houses are in
   socialhousing-markup ;; decreases price if social housing
@@ -52,6 +54,7 @@ to setup
   reset-ticks
   set network-list []
   set network-list-class []
+  set list-district-colours [pink magenta violet blue sky]
   ;; create a turtle on NUMBER randomly selected patches.
   ;; note that slider's maximum value is 5800 which is a little less than the total number of patches,
   ;; which is 6400
@@ -186,10 +189,12 @@ to update-houses
       set rent-price round(old-price + 0.003 * avg-price) ; could also include a factor for the average income of turtles around
     ]
      if ticks mod 20 = 0 and pcolor != orange [
-      set pcolor scale-color violet rent-price (max[rent-price] of patches) (min[rent-price] of patches)
+      ifelse different-district-colours? [
+      set pcolor scale-color item district list-district-colours rent-price (max[rent-price] of patches) (min[rent-price] of patches)]
+      [set pcolor scale-color item district list-district-colours rent-price (max[rent-price] of patches) (min[rent-price] of patches)]
+    ]
      ;; this command here is suuper useful to see the clustering in house prices. However, having it run at
      ;; every period makes the simulation really slow
-    ]
   ]
 end
 
@@ -524,7 +529,7 @@ reliance-on-network
 reliance-on-network
 0
 100
-71.0
+100.0
 1
 1
 NIL
@@ -557,7 +562,7 @@ number-socialhousing
 number-socialhousing
 0
 0.2 * count patches
-156.0
+334.0
 1
 1
 NIL
@@ -592,7 +597,18 @@ SWITCH
 503
 social-housing?
 social-housing?
-0
+1
+1
+-1000
+
+SWITCH
+1170
+430
+1362
+463
+different-district-colours?
+different-district-colours?
+1
 1
 -1000
 

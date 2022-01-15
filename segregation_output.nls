@@ -17,14 +17,14 @@
 ;end
 
 to segregation-output-normative
-  set segregation_working_norm mean [ count ( turtles-on neighbors ) with [ breed =
-  "greeneries" or breed = "services" ]] of turtles with [ class = "working class" ]
+  set segregation_working_norm mean [ count ( turtles-on neighbors ) with [ class =
+  "infrastructure" ]] of turtles with [ class = "working class" ]
   
-  set segregation_middle_norm mean [ count ( turtles-on neighbors ) with [ breed =
-  "greeneries" or breed = "services"]] of turtles with [ class = "middle class" ]
+  set segregation_middle_norm mean [ count ( turtles-on neighbors ) with [ class =
+  "infrastructure"]] of turtles with [ class = "middle class" ]
   
-  set segregation_upper_norm mean [ count ( turtles-on neighbors ) with [ breed =
-  "greeneries" or breed = "services" ]] of turtles with [ class = "upper class" ]
+  set segregation_upper_norm mean [ count ( turtles-on neighbors ) with [ class =
+  "infrastructure" ]] of turtles with [ class = "upper class" ]
 end
 
 to segregation-output-objective

@@ -1,23 +1,32 @@
 ;; generate public services and green areas in the city
 
 to class-assignment
-  set color one-of [yellow green red]
+  ; assign a colour to each third of the total households
+  ask n-of round(count households / 3) households with [color = black][ 
+    set color red]
+  ask n-of round(count households / 3) households with [color = black][ 
+    set color green]
+  ask households with [color = black][
+    set color yellow]
+  
   ;assigns class based on color
-  if color = yellow [
-      set class "working class"
-      set income ((random-gamma 9 6) * 400 * [adults] of self)
-      set wealth round ((random-gamma 9 6) * 300)
-      set minimum-score 25]
-    if color = green [
-      set class "middle class"
-      set income ((random-gamma 9 6) * 800 * [adults] of self)
-      set wealth round ((random-gamma 9 6) * 650) 
-      set minimum-score 35]
-    if color = red [
-      set class "upper class"
-      set income ((random-gamma 9 6) * 1200 * [adults] of self)
-      set wealth round ((random-gamma 9 6) * 1000) 
-      set minimum-score 50]
+  ask households [
+    if color = yellow [
+        set class "working class"
+        set income ((random-gamma 9 6) * 400 * [adults] of self)
+        set wealth round ((random-gamma 9 6) * 300)
+        set minimum-score 25]
+      if color = green [
+        set class "middle class"
+        set income ((random-gamma 9 6) * 800 * [adults] of self)
+        set wealth round ((random-gamma 9 6) * 650) 
+        set minimum-score 35]
+      if color = red [
+        set class "upper class"
+        set income ((random-gamma 9 6) * 1200 * [adults] of self)
+        set wealth round ((random-gamma 9 6) * 1000) 
+        set minimum-score 50]
+  ]
 end
 
 to create-social-network

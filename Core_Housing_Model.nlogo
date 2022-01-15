@@ -72,14 +72,16 @@ to setup
     set adults one-of [1 2]
     set kids one-of [0 1 2 3 4 5]
     set members (adults + kids)
-    class-assignment ; assigns class, income and wealth
     set distance-preference random-float 0.33 + 0.33
     set services-preference random-float 0.5 + 0.5
     set green-preference random-float 0.5 + 0.5
     set just-moved? 0
     set shape "circle"
     set size 0.5
+    set color black
   ]
+
+  class-assignment
 
   ; social network creation needs to be done after all the turtles have been assigned a class
   ask households [

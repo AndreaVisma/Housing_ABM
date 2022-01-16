@@ -18,7 +18,7 @@ to calculate-own-house-score
     let distance-from-green distance least-distant-green ; calculates the distance to the closest green spot
       
     set own-score (own-score + 0.5 * distance-preference * (max-pxcor - distance-from-center) +
-       services-preference * (15 - distance-from-service) + green-preference * (15 - distance-from-green))
+       services-preference * (20 - distance-from-service) + green-preference * (20 - distance-from-green))
       
     set own-score own-score * [district-markup] of patch-here
   
@@ -60,7 +60,7 @@ to find-new-spot
          let distance-from-green distance least-distant-green ; calculates the distance to the closest green spot
          
          set score-here (score-here + 0.5 * distance-preference * (max-pxcor - distance-from-center) + 
-            services-preference * (15 - distance-from-services) + green-preference * (15 - distance-from-green))
+            services-preference * (20 - distance-from-services) + green-preference * (20 - distance-from-green))
          
          set score-here score-here * [district-markup] of patch-here
          

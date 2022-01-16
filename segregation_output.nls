@@ -16,6 +16,56 @@
 ;"upper class" ]] of turtles with [ class = "upper class" ]
 ;end
 
+globals [
+  segregation_working_obj ;;average segregation measure for the working class based on distribution of turtles of the same class in neighboring patches
+  segregation_middle_obj ;;average segregation measure for the middle class based on distribution of turtles of the same class in neighboring patches
+  segregation_upper_obj ;;average segregation measure for the upper class based on distribution of turtles of the same class in neighboring patches
+  segregation_working_norm ;;average segregation measure for the working class based on distance to greeneries and services
+  segregation_middle_norm ;;average segregation measure for the middle class based on distance to greeneries and services
+  segregation_upper_norm ;;average segregation measure for the upper class based on distance to greeneries and services
+  total-working
+  total-middle
+  total-upper
+  working-district-1
+  working-district-2
+  working-district-3
+  working-district-4
+  working-periphery
+  working-centre
+  middle-district-1
+  middle-district-2
+  middle-district-3
+  middle-district-4
+  middle-periphery
+  middle-centre
+  upper-district-1
+  upper-district-2
+  upper-district-3
+  upper-district-4
+  upper-periphery
+  upper-centre
+  working-avg-distance-services
+  middle-avg-distance-services
+  upper-avg-distance-services
+  working-avg-distance-green
+  middle-avg-distance-green
+  upper-avg-distance-green
+  
+  min-income
+  max-income
+  mean-income
+  std-income
+  min-wealth
+  max-wealth
+  avg-wealth
+  std-wealth
+  min-houseprice
+  max-houseprice
+  avg-houseprice
+  std-houseprice
+]
+
+
 to segregation-output-normative
   set segregation_working_norm mean [ count ( turtles-on neighbors ) with [ class =
   "infrastructure" ]] of turtles with [ class = "working class" ]
@@ -37,3 +87,87 @@ to segregation-output-objective
   set segregation_upper_obj mean [ count ( turtles-on neighbors ) with [ class =
   "upper class" ]] of turtles with [ class = "upper class" ]
 end
+
+to district-segregation
+  set total-working count households with [class = "working class"]
+  set total-middle count households with [class = "middle class"]
+  set total-upper count households with [class = "upper class"]
+  
+  set working-district-1 count (turtles-on patches with [district = 1]) with [class = "working class"]
+  set middle-district-1 count (turtles-on patches with [district = 1]) with [class = "middle class"]
+  set upper-district-1 count (turtles-on patches with [district = 1]) with [class = "upper class"]
+  
+  set working-district-2 count (turtles-on patches with [district = 2]) with [class = "working class"]
+  set middle-district-2 count (turtles-on patches with [district = 2]) with [class = "middle class"]
+  set upper-district-2 count (turtles-on patches with [district = 2]) with [class = "upper class"]
+  
+  set working-district-3 count (turtles-on patches with [district = 3]) with [class = "working class"]
+  set middle-district-3 count (turtles-on patches with [district = 3]) with [class = "middle class"]
+  set upper-district-3 count (turtles-on patches with [district = 3]) with [class = "upper class"]
+  
+  set working-district-4 count (turtles-on patches with [district = 4]) with [class = "working class"]
+  set middle-district-4 count (turtles-on patches with [district = 4]) with [class = "middle class"]
+  set upper-district-4 count (turtles-on patches with [district = 4]) with [class = "upper class"]
+  
+  set working-periphery count (turtles-on patches with [district = 0]) with [class = "working class"]
+  set middle-periphery count (turtles-on patches with [district = 0]) with [class = "middle class"]
+  set upper-periphery count (turtles-on patches with [district = 0]) with [class = "upper class"]
+  
+  set working-centre count (turtles-on patches with [district != 0]) with [class = "working class"]
+  set middle-centre count (turtles-on patches with [district != 0]) with [class = "middle class"]
+  set upper-centre count (turtles-on patches with [district != 0]) with [class = "upper class"]
+end
+
+to distance-amenities-segregation
+  let working-distances-green []
+  ask households with [class = "working class"][
+    let least-distant-green min-one-of greeneries [distance myself] ; the closest services point to the house
+    set working-distances-green lput (distance least-distant-green) working-distances-green]
+  set working-avg-distance-green mean working-distances-green
+  
+  let middle-distances-green []
+  ask households with [class = "middle class"][
+    let least-distant-green min-one-of greeneries [distance myself] ; the closest services point to the house
+    set middle-distances-green lput (distance least-distant-green) middle-distances-green]
+  set middle-avg-distance-green mean middle-distances-green
+  
+  let upper-distances-green []
+  ask households with [class = "upper class"][
+    let least-distant-green min-one-of greeneries [distance myself] ; the closest services point to the house
+    set upper-distances-green lput (distance least-distant-green) upper-distances-green]
+  set upper-avg-distance-green mean upper-distances-green
+  
+  let working-distances-services []
+  ask households with [class = "working class"][
+    let least-distant-service min-one-of services [distance myself] ; the closest services point to the house
+    set working-distances-services lput (distance least-distant-service) working-distances-services]
+  set working-avg-distance-services mean working-distances-services
+  
+  let middle-distances-services []
+  ask households with [class = "middle class"][
+    let least-distant-service min-one-of services [distance myself] ; the closest services point to the house
+    set middle-distances-services lput (distance least-distant-service) middle-distances-services]
+  set middle-avg-distance-services mean middle-distances-services
+  
+  let upper-distances-services []
+  ask households with [class = "upper class"][
+    let least-distant-service min-one-of services [distance myself] ; the closest services point to the house
+    set upper-distances-services lput (distance least-distant-service) upper-distances-services]
+  set upper-avg-distance-services mean upper-distances-services
+end
+
+to household-reporters
+  set min-income min[income] of households
+  set max-income max[income] of households
+  set mean-income mean[income] of households
+  set std-income standard-deviation[income] of households
+  set min-wealth min [wealth] of households
+  set max-wealth max [wealth] of households
+  set avg-wealth mean [wealth] of households
+  set std-wealth standard-deviation [wealth] of households
+  set min-houseprice min[rent-price] of patches with [pcolor != green]
+  set max-houseprice max[rent-price] of patches with [pcolor != green]
+  set avg-houseprice mean[rent-price] of patches with [pcolor != green]
+  set std-houseprice standard-deviation[rent-price] of patches with [pcolor != green]
+end
+

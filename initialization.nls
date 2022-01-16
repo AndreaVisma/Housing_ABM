@@ -15,17 +15,17 @@ to class-assignment
         set class "working class"
         set income ((random-gamma 9 6) * 400 * [adults] of self)
         set wealth round ((random-gamma 9 6) * 300)
-        set minimum-score 25]
+        set minimum-score minimum-score-working]
       if color = green [
         set class "middle class"
         set income ((random-gamma 9 6) * 800 * [adults] of self)
         set wealth round ((random-gamma 9 6) * 650) 
-        set minimum-score 35]
+        set minimum-score minimum-score-middle]
       if color = red [
         set class "upper class"
         set income ((random-gamma 9 6) * 1200 * [adults] of self)
         set wealth round ((random-gamma 9 6) * 1000) 
-        set minimum-score 50]
+        set minimum-score minimum-score-upper]
   ]
 end
 
@@ -46,7 +46,7 @@ to services-and-greenery
   
   random-seed 1234 ;allows to always have the same pseudo-random distribution of greeneries and services
   
-  ask n-of (0.02 * count patches) patches [
+  ask n-of (0.01 * count patches) patches [
     set pcolor green
     sprout 1 [
       set breed services
@@ -55,7 +55,7 @@ to services-and-greenery
     ]
   ]
   
-  ask n-of (0.02 * count patches) patches with [pcolor = black] [
+  ask n-of (0.01 * count patches) patches with [pcolor = black] [
     set pcolor green
     sprout 1 [
       set breed greeneries

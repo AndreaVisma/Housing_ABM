@@ -2,6 +2,24 @@
 ;; In the current specification, turtles choose 5 random houses around them and 
 ;; pick the one that better matches their preferences
 
+globals [
+  working-district-1-percentage 
+  middle-district-1-percentage 
+  upper-district-1-percentage 
+  working-district-2-percentage 
+  middle-district-2-percentage 
+  upper-district-2-percentage 
+  working-district-3-percentage 
+  middle-district-3-percentage 
+  upper-district-3-percentage 
+  working-district-4-percentage 
+  middle-district-4-percentage 
+  upper-district-4-percentage 
+  working-periphery-percentage 
+  middle-periphery-percentage 
+  upper-periphery-percentage  
+]
+
 
 to calculate-own-house-score
   
@@ -23,6 +41,7 @@ to calculate-own-house-score
     set own-score own-score * [district-markup] of patch-here
   
 end
+
 
 
 to find-new-spot
@@ -51,6 +70,32 @@ to find-new-spot
            set score-here (score-here + 5 * ([rooms] of patch-here - members))][ ; positive if there is enough place
            set score-here (score-here - 10)]  ; negative if not enough place, but still ok to move
          
+         ifelse class = "working class"[
+            let district-here [district] of patch-here
+            let district-percentage ((count (turtles-on patches with [district = district-here]) with [class = "working class"]) / (count (turtles-on patches with [district = district-here])) * 100)
+            ifelse district-percentage >= (33.3)[ ;check similarity in area
+            set score-here (score-here + 5)] ;positive if there are enough of own class in the area
+          [ set score-here (score-here - 5)] ;negative if under the threshold of 1/3
+            
+            ][ ifelse class = "middle class" [ let district-here [district] of patch-here
+            let district-percentage ((count (turtles-on patches with [district = district-here]) with [class = "middle class"]) / (count (turtles-on patches with [district = district-here])) * 100)
+            ifelse district-percentage >= (33.3)[ ;check similarity in area
+            set score-here (score-here + 5)] ;positive if there are enough of own class in the area
+          [ set score-here (score-here - 5)] ;negative if under the threshold of 1/3
+              
+            ][ let district-here [district] of patch-here
+            let district-percentage ((count (turtles-on patches with [district = district-here]) with [class = "upper class"]) / (count (turtles-on patches with [district = district-here])) * 100)
+            ifelse district-percentage >= (33.3)[ ;check similarity in area
+            set score-here (score-here + 5)] ;positive if there are enough of own class in the area
+          [ set score-here (score-here - 5)] ;negative if under the threshold of 1/3
+          ]
+          ]
+          
+;           ifelse district-percentage >= (33.3)[ ;check similarity in area
+;            set score-here (score-here + 10)] ;positive if there are enough of own class in the area
+;          [ set score-here (score-here - 10)] ;negative if under the threshold of 1/3
+;            
+          
          let distance-from-center distancexy 0 0 ; the closest the house is to the center, the better
          
          let least-distant-services min-one-of services [distance myself] ; the closest services point to the house
@@ -85,3 +130,25 @@ to find-new-spot
   setxy (item index xcor-aim) (item index ycor-aim)
 end
 
+to similarityindex
+  ;; calculate % of one class of the total population in that area
+  set working-district-1-percentage (working-district-1 / count (turtles-on patches with [district = 1]) * 100)
+  set middle-district-1-percentage (middle-district-1 / count (turtles-on patches with [district = 1]) * 100)
+  set upper-district-1-percentage (upper-district-1 / count (turtles-on patches with [district = 1]) * 100)
+  
+  set working-district-2-percentage (working-district-2 / count (turtles-on patches with [district = 2]) * 100)
+  set middle-district-2-percentage (middle-district-2 / count (turtles-on patches with [district = 2]) * 100)
+  set upper-district-2-percentage (upper-district-1 / count (turtles-on patches with [district = 2]) * 100)
+  
+  set working-district-3-percentage (working-district-3 / count (turtles-on patches with [district = 3]) * 100)
+  set middle-district-3-percentage (middle-district-3 / count (turtles-on patches with [district = 3]) * 100)
+  set upper-district-3-percentage (upper-district-3 / count (turtles-on patches with [district = 3]) * 100)
+  
+  set working-district-4-percentage (working-district-4 / count (turtles-on patches with [district = 4]) * 100)
+  set middle-district-4-percentage (middle-district-4 / count (turtles-on patches with [district = 4]) * 100)
+  set upper-district-4-percentage (upper-district-4 / count (turtles-on patches with [district = 4]) * 100)
+  
+  set working-periphery-percentage (working-periphery / count (turtles-on patches with [district = 0]) * 100)
+  set middle-periphery-percentage (middle-periphery / count (turtles-on patches with [district = 0]) * 100)
+  set upper-periphery-percentage (upper-periphery / count (turtles-on patches with [district = 0]) * 100)
+end

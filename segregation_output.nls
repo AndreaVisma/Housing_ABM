@@ -5,16 +5,7 @@
 ;Then we take the average over all the agents in the same group. This is taken as an average measure of the segregation of each group separately
 ;monitor those varibales
 
-;to segregation-output
-;set segregation_working mean [ count ( turtles-on neighbors ) with [ class =
-;"working class" ]] of turtles with [ class = "working class" ]
-;
-;set segregation_middle mean [ count ( turtles-on neighbors ) with [ class =
-;"middle class" ]] of turtles with [ class = "middle class" ]
-;
-;set segregation_upper mean [ count ( turtles-on neighbors ) with [ class =
-;"upper class" ]] of turtles with [ class = "upper class" ]
-;end
+ 
 
 globals [
   segregation_working_obj ;;average segregation measure for the working class based on distribution of turtles of the same class in neighboring patches
@@ -67,24 +58,24 @@ globals [
 
 
 to segregation-output-normative
-  set segregation_working_norm mean [ count ( turtles-on neighbors ) with [ class =
+  set segregation_working_norm mean [ count (  households in-radius 2  ) with [ class =
   "infrastructure" ]] of turtles with [ class = "working class" ]
   
-  set segregation_middle_norm mean [ count ( turtles-on neighbors ) with [ class =
+  set segregation_middle_norm mean [ count ( households in-radius 2  ) with [ class =
   "infrastructure"]] of turtles with [ class = "middle class" ]
   
-  set segregation_upper_norm mean [ count ( turtles-on neighbors ) with [ class =
+  set segregation_upper_norm mean [ count (  households in-radius 2 ) with [ class =
   "infrastructure" ]] of turtles with [ class = "upper class" ]
 end
 
 to segregation-output-objective
-  set segregation_working_obj mean [ count ( turtles-on neighbors ) with [ class =
+  set segregation_working_obj mean [ count ( households in-radius 2 ) with [ class =
   "working class" ]] of turtles with [ class = "working class" ]
   
-  set segregation_middle_obj mean [ count ( turtles-on neighbors ) with [ class =
+  set segregation_middle_obj mean [ count ( households in-radius 2 ) with [ class =
   "middle class" ]] of turtles with [ class = "middle class" ]
   
-  set segregation_upper_obj mean [ count ( turtles-on neighbors ) with [ class =
+  set segregation_upper_obj mean [ count ( households in-radius 2 ) with [ class =
   "upper class" ]] of turtles with [ class = "upper class" ]
 end
 

@@ -580,7 +580,7 @@ number-socialhousing
 0.6 * count patches
 350.0
 50
-
+1
 1
 NIL
 HORIZONTAL

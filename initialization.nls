@@ -88,11 +88,11 @@ to social-housing-creation
     random-seed 1234] ; always generates the same pseudo-random numbers: the same patches will be social housing
     let number-clusters round(number-socialhousing / 5)
     ask n-of number-clusters patches with [pcolor != green] [
-      set socialhousing-markup 0.5
+      set socialhousing-markup 0.6
       set pcolor orange
       set access ["working class"]
       ask neighbors4 [
-        set socialhousing-markup 0.5
+        set socialhousing-markup 0.6
         set pcolor orange
         set access ["working class"]
       ]
@@ -102,7 +102,7 @@ to social-housing-creation
     if fixed-distr-social-housing [
        random-seed 1234] ; always generates the same pseudo-random numbers: the same patches will be social housing
     ask n-of number-socialhousing patches with [pcolor != green] [
-      set socialhousing-markup 0.5
+      set socialhousing-markup 0.6
       set pcolor orange
       set access "working class"]
    random-seed new-seed ;restores the "randomness" by assigning a seed based on current datetime 

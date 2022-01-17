@@ -38,9 +38,12 @@ to price-clustering
       set district-markup 1
       set district 0
     ]
- 
+    
+    ifelse pcolor != orange [
     ; set rent price by interaxting all the possible markups
-    set rent-price round (dimension * price-sqm * distance-markup * perif-markup * district-markup * socialhousing-markup)
+      set rent-price round (dimension * price-sqm * distance-markup * perif-markup * district-markup * socialhousing-markup)]
+    ; set rent price based only on dimensions and square meters price for social housing
+    [ set rent-price round (dimension * price-sqm * socialhousing-markup)]
     
     ; if the house is private, set the colours based on the rent-price
     if pcolor != orange [ 

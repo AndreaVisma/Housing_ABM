@@ -139,6 +139,7 @@ to go
   district-segregation
   distance-amenities-segregation
   household-reporters
+  similarityindex
   tick
 end
 
@@ -544,7 +545,7 @@ reliance-on-network
 reliance-on-network
 0
 100
-100.0
+87.0
 1
 1
 NIL
@@ -579,6 +580,7 @@ number-socialhousing
 0.6 * count patches
 350.0
 50
+
 1
 NIL
 HORIZONTAL
@@ -601,7 +603,7 @@ SWITCH
 503
 clustered-social-housing
 clustered-social-housing
-1
+0
 1
 -1000
 
@@ -1064,7 +1066,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.2.2
+NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@

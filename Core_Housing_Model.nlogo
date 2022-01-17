@@ -581,7 +581,6 @@ number-socialhousing
 350.0
 50
 1
-1
 NIL
 HORIZONTAL
 

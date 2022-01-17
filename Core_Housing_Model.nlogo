@@ -194,16 +194,15 @@ end
 to update-houses
   ;;increases the price of the house based on the price of neighbouring houses and the income of their occupants
   ask patches with [pcolor != green] [
-    let old-price rent-price
-    let avg-price mean ([rent-price] of neighbors)
-    ; if there's no turtles around the house, set the average income to the global average of incomes
-    ifelse any? turtles-on neighbors[
-      let avg-income mean ([income] of households in-radius 2)
+    ifelse pcolor != orange [
+      let old-price rent-price
+      let avg-price mean ([rent-price] of neighbors)
       set rent-price round(old-price + 0.003 * avg-price) ; could also include a factor for the average income of turtles around
     ][
-      let avg-income mean ([income] of households)
-      set rent-price round(old-price + 0.003 * avg-price) ; could also include a factor for the average income of turtles around
+      let old-price rent-price
+      set rent-price round(old-price + 0.003 * old-price) ; could also include a factor for the average income of turtles around
     ]
+
      if ticks mod 20 = 0 and pcolor != orange [
       ifelse different-district-colours? [
       set pcolor scale-color item district list-district-colours rent-price (max[rent-price] of patches) (min[rent-price] of patches)]
@@ -577,9 +576,9 @@ SLIDER
 number-socialhousing
 number-socialhousing
 0
-0.3 * count patches
+0.6 * count patches
 350.0
-1
+50
 1
 NIL
 HORIZONTAL

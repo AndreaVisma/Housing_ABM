@@ -26,9 +26,13 @@ except OSError:
 sns.set("notebook")
 sns.set_style("darkgrid")
 
-data_file = os.path.join(THIS_FOLDER, 'Core_Housing_Model experiment_social_housing-table.csv')
+data_file = os.path.join(THIS_FOLDER, 'Core_Housing_Model poster_output-table.csv')
+baseline_file = os.path.join(THIS_FOLDER, 'Core_Housing_Model baseline-table.csv')
 
-df = pd.read_csv(data_file, skiprows = 6)
+df_1 = pd.read_csv(data_file, skiprows = 6)
+df_2 = pd.read_csv(baseline_file, skiprows = 6)
+
+df = pd.concat([df_2, df_1])
 
 df.rename(columns = {'segregation_working_obj ;;average segregation measure for the working class based on distribution of turtles of the same class in neighboring patches' : 'segregation_working_obj',
 'segregation_middle_obj ;;average segregation measure for the middle class based on distribution of turtles of the same class in neighboring patches': 'segregation_middle_obj',
@@ -67,7 +71,7 @@ df_social_housing_avg = df_social_housing.groupby(['[step]', 'clustered-social-h
 fig, ax = plt.subplots()
 
 ax = sns.scatterplot(data=df_baseline, x="[step]", y="percent-unhappy")
-ax.set(xlim=(-5, 155))
+ax.set(xlim=(-5, 105))
 ax.set_xlabel('Simulation Time')
 ax.set_title('Percentage unhappy families at each time step')
 ax.get_figure().savefig(output_fol + "scatter_base_unhappiness.pdf",
@@ -78,7 +82,7 @@ plt.close()
 fig, ax = plt.subplots()
 
 ax = sns.scatterplot(data=df_baseline, x="[step]", y="percent-cannot-afford")
-ax.set(xlim=(-5, 155))
+ax.set(xlim=(-5, 105))
 ax.set_xlabel('Simulation Time')
 ax.set_title('Percentage families that cannot afford their house at each time step')
 ax.get_figure().savefig(output_fol + "scatter_base_afford.pdf",
@@ -102,7 +106,7 @@ plt.close()
 fig, ax = plt.subplots()
 
 ax = sns.lineplot(data=df_baseline_avg, x="[step]", y="percent-unhappy")
-ax.set(xlim=(-5, 155))
+ax.set(xlim=(-5, 105))
 ax.set_xlabel('Simulation Time')
 ax.set_title('Percentage unhappy families at each time step')
 ax.get_figure().savefig(output_fol + "timeseries_base_unhappiness.pdf",
@@ -113,7 +117,7 @@ plt.close()
 fig, ax = plt.subplots()
 
 ax = sns.lineplot(data=df_baseline_avg, x="[step]", y="percent-cannot-afford")
-ax.set(xlim=(-5, 155))
+ax.set(xlim=(-5, 105))
 ax.set_xlabel('Simulation Time')
 ax.set_title('Percentage families that cannot afford their house at each time step')
 ax.get_figure().savefig(output_fol + "timeseries_base_afford.pdf",
@@ -140,7 +144,7 @@ plt.close()
 fig, ax = plt.subplots()
 
 ax = sns.scatterplot(data=df_social_housing, x="[step]", y="percent-unhappy", hue = 'number-socialhousing')
-ax.set(xlim=(-5, 155))
+ax.set(xlim=(-5, 105))
 ax.set_xlabel('Simulation Time')
 ax.set_title('Percentage unhappy families at each time step')
 ax.get_figure().savefig(output_fol + "scatter_SH_unhappiness.pdf",
@@ -151,7 +155,7 @@ plt.close()
 fig, ax = plt.subplots()
 
 ax = sns.scatterplot(data=df_social_housing, x="[step]", y="percent-cannot-afford", hue = 'number-socialhousing')
-ax.set(xlim=(-5, 155))
+ax.set(xlim=(-5, 105))
 ax.set_xlabel('Simulation Time')
 ax.set_title('Percentage families that cannot afford their house at each time step')
 ax.get_figure().savefig(output_fol + "scatter_SH_afford.pdf",
@@ -175,7 +179,7 @@ plt.close()
 fig, ax = plt.subplots()
 
 ax = sns.scatterplot(data=df_social_housing_avg, x="[step]", y="percent-unhappy", size = 'number-socialhousing', hue = 'clustered-social-housing')
-ax.set(xlim=(-5, 155))
+ax.set(xlim=(-5, 105))
 ax.set_xlabel('Simulation Time')
 ax.set_title('Percentage unhappy families at each time step')
 ax.get_figure().savefig(output_fol + "timeseries_SH_unhappiness.pdf",
@@ -186,7 +190,7 @@ plt.close()
 fig, ax = plt.subplots()
 
 ax = sns.scatterplot(data=df_social_housing_avg, x="[step]", y="percent-cannot-afford", size = 'number-socialhousing', hue = 'clustered-social-housing')
-ax.set(xlim=(-5, 155))
+ax.set(xlim=(-5, 105))
 ax.set_xlabel('Simulation Time')
 ax.set_title('Percentage families that cannot afford their house at each time step')
 ax.get_figure().savefig(output_fol + "timeseries_SH_afford.pdf",
@@ -219,14 +223,15 @@ df_social_housing = df_social_housing[df_social_housing['[step]'] > 4]
 
 df_social_housing_avg = df_social_housing.groupby(['[step]', 'clustered-social-housing', 'number-socialhousing']).mean()
 
-
+df = df[df['[step]'] > 4]
+df_avgs = df.groupby(['[step]', 'social-housing?', 'clustered-social-housing', 'number-socialhousing']).mean()
 #%%create a timeline of the evolution of unhappiness and people that cannot afford their house
 # for the baseline case
 
 fig, ax = plt.subplots()
 
 ax = sns.scatterplot(data=df_baseline, x="[step]", y="percent-unhappy")
-ax.set(xlim=(-5, 155))
+ax.set(xlim=(-5, 105))
 ax.set_xlabel('Simulation Time')
 ax.set_title('Percentage unhappy families at each time step')
 ax.get_figure().savefig(output_fol + "scatter_base_unhappiness_after5.pdf",
@@ -237,7 +242,7 @@ plt.close()
 fig, ax = plt.subplots()
 
 ax = sns.scatterplot(data=df_baseline, x="[step]", y="percent-cannot-afford")
-ax.set(xlim=(-5, 155))
+ax.set(xlim=(-5, 105))
 ax.set_xlabel('Simulation Time')
 ax.set_title('Percentage families that cannot afford their house at each time step')
 ax.get_figure().savefig(output_fol + "scatter_base_afford_after5.pdf",
@@ -258,28 +263,33 @@ ax.get_figure().savefig(output_fol + "scatter_base_all_correlation_after5.pdf",
 plt.show()
 plt.close()
 
+#%% Nice lineplots 
+
 fig, ax = plt.subplots()
 
-ax = sns.lineplot(data=df_baseline_avg, x="[step]", y="percent-unhappy")
-ax.set(xlim=(-5, 155))
+ax = sns.lineplot(data=df_baseline_avg, x="[step]", y="percent-unhappy", color = 'r', label = '0')
+ax = sns.lineplot(data =df_social_housing_avg, x = '[step]', y="percent-unhappy", hue = 'number-socialhousing', palette = 'pastel')
+ax.set(xlim=(-5, 105))
 ax.set_xlabel('Simulation Time')
 ax.set_title('Percentage unhappy families at each time step')
-ax.get_figure().savefig(output_fol + "timeseries_base_unhappiness_after5.pdf",
+ax.get_figure().savefig(output_fol + "timeseries_unhappiness_after5.pdf",
                  bbox_inches='tight')
 plt.show()
 plt.close()
 
 fig, ax = plt.subplots()
 
-ax = sns.lineplot(data=df_baseline_avg, x="[step]", y="percent-cannot-afford")
-ax.set(xlim=(-5, 155))
+ax = sns.lineplot(data=df_baseline_avg, x="[step]", y="percent-cannot-afford", color = 'r', label = '0', legend = False)
+ax = sns.lineplot(data =df_social_housing_avg, x = '[step]', y="percent-cannot-afford", hue = 'number-socialhousing', palette = 'pastel', legend = False)
+ax.set(xlim=(-5, 105))
 ax.set_xlabel('Simulation Time')
 ax.set_title('Percentage families that cannot afford their house at each time step')
-ax.get_figure().savefig(output_fol + "timeseries_base_afford_after5.pdf",
+ax.get_figure().savefig(output_fol + "timeseries_afford_after5.pdf",
                  bbox_inches='tight')
 plt.show()
 plt.close()
 
+#%%
 # correlation between unhappiness and cannot afford
 
 fig, ax = plt.subplots()
@@ -394,34 +404,59 @@ plt.close()
 
 #%% Segregation measures
 
-df_avgs = df.groupby(['[step]', 'social-housing?', 'clustered-social-housing', 'number-socialhousing']).mean()
 l1 = df_avgs.index.get_level_values(1)
-l2 = df_avgs.index.get_level_values(2)
+
 df_avgs_SH = df_avgs[(l1== True)]
 df_avgs_no_SH = df_avgs[(l1== False)]
 
 #%% objective and normative segregation
-fig,ax = plt.subplots(1, 2, sharey = True)
+sns.set_palette(sns.color_palette(['gold', 'limegreen', 'darkred']))
+
+clustered_SH = False
+
+if clustered_SH:
+    l2 = df_avgs_SH.index.get_level_values(2)
+    df_avgs_SH = df_avgs_SH[(l2 == True)]
+else :
+    l2 = df_avgs_SH.index.get_level_values(2)
+    df_avgs_SH = df_avgs_SH[(l2 == False)]
+    
+l3 =  df_avgs_SH.index.get_level_values(3)
+SH_units_max = max(np.unique(l3))
+SH_units_half = round(0.5 * max(np.unique(l3)))
+df_avgs_SH_max = df_avgs_SH[(l3== SH_units_max)]
+df_avgs_SH_half = df_avgs_SH[(l3== SH_units_half)]
+
+fig,ax = plt.subplots(1, 3, sharey = True, figsize=(10,5))
 
 sns.lineplot(ax = ax[0], data = df_avgs_no_SH, x = '[step]', y = 'segregation_working_obj',
-                        palette = 'viridis', label = 'working class')
+                        label = 'working class', legend = False)
 sns.lineplot(ax = ax[0], data = df_avgs_no_SH, x = '[step]', y = 'segregation_middle_obj',
-                        palette = 'Blues', label = 'middle class')
+                        label = 'middle class', legend = False)
 sns.lineplot(ax = ax[0], data = df_avgs_no_SH, x = '[step]', y = 'segregation_upper_obj',
-                        palette = 'rocket', label ='upper class')
+                        label ='upper class', legend = False)
 
-sns.lineplot(ax = ax[1], data = df_avgs_SH, x = '[step]', y = 'segregation_working_obj',
-                        palette = 'viridis', label = 'working class')
-sns.lineplot(ax = ax[1], data = df_avgs_SH, x = '[step]', y = 'segregation_middle_obj',
-                        palette = 'Blues', label = 'middle class')
-sns.lineplot(ax = ax[1], data = df_avgs_SH, x = '[step]', y = 'segregation_upper_obj',
-                        palette = 'rocket', label ='upper class')
+sns.lineplot(ax = ax[1], data = df_avgs_SH_half, x = '[step]', y = 'segregation_working_obj',
+                        label = 'working class', ci = None, legend = False)
+sns.lineplot(ax = ax[1], data = df_avgs_SH_half, x = '[step]', y = 'segregation_middle_obj',
+                        label = 'middle class', ci = None, legend = False)
+sns.lineplot(ax = ax[1], data = df_avgs_SH_half, x = '[step]', y = 'segregation_upper_obj',
+                        label ='upper class', ci = None, legend = False)
+
+sns.lineplot(ax = ax[2], data = df_avgs_SH_max, x = '[step]', y = 'segregation_working_obj',
+                        label = 'working class', ci = None)
+sns.lineplot(ax = ax[2], data = df_avgs_SH_max, x = '[step]', y = 'segregation_middle_obj',
+                        label = 'middle class', ci = None)
+sns.lineplot(ax = ax[2], data = df_avgs_SH_max, x = '[step]', y = 'segregation_upper_obj',
+                        label ='upper class', ci = None)
 
 ax[0].set_title('No social housing')
 ax[0].set_ylabel('Average number neighbors of the same class')
 ax[0].set_xlabel('Simulation time')
 ax[1].set_xlabel('Simulation time')
-ax[1].set_title('With social housing')
+ax[1].set_title(f'With {SH_units_half} social housing units')
+ax[2].set_xlabel('Simulation time')
+ax[2].set_title(f'With {SH_units_max} social housing units')
     
 fig.get_figure().savefig(output_fol + "objective_segregation_comparison1.pdf",
                  bbox_inches='tight')
@@ -429,6 +464,7 @@ fig.get_figure().savefig(output_fol + "objective_segregation_comparison1.pdf",
 plt.show()
 plt.close()
 
+#%%
 fig,ax = plt.subplots(1, 2, sharey = True)
 
 sns.lineplot(ax = ax[0], data = df_avgs_no_SH, x = '[step]', y = 'segregation_working_norm',
@@ -459,27 +495,36 @@ plt.close()
 
 #%%
 
-fig,ax = plt.subplots(1, 2, sharey = True)
+fig,ax = plt.subplots(1, 3, sharey = True, figsize = (10, 5))
 
 sns.lineplot(ax = ax[0], data = df_avgs_no_SH, x = '[step]', y = 'working-avg-distance-services',
-                        palette = 'viridis', label = 'working class')
+                        label = 'working class', legend = False)
 sns.lineplot(ax = ax[0], data = df_avgs_no_SH, x = '[step]', y = 'middle-avg-distance-services',
-                        palette = 'Blues', label = 'middle class')
+                        label = 'middle class', legend = False)
 sns.lineplot(ax = ax[0], data = df_avgs_no_SH, x = '[step]', y = 'upper-avg-distance-services',
-                        palette = 'rocket', label ='upper class')
+                        label ='upper class', legend = False)
 
-sns.lineplot(ax = ax[1], data = df_avgs_SH, x = '[step]', y = 'working-avg-distance-services',
-                        palette = 'viridis', label = 'working class')
-sns.lineplot(ax = ax[1], data = df_avgs_SH, x = '[step]', y = 'middle-avg-distance-services',
-                        palette = 'Blues', label = 'middle class')
-sns.lineplot(ax = ax[1], data = df_avgs_SH, x = '[step]', y = 'upper-avg-distance-services',
-                        palette = 'rocket', label ='upper class')
+sns.lineplot(ax = ax[1], data = df_avgs_SH_half, x = '[step]', y = 'working-avg-distance-services',
+                        ci = None, label = 'working class', legend = False)
+sns.lineplot(ax = ax[1], data = df_avgs_SH_half, x = '[step]', y = 'middle-avg-distance-services',
+                        ci = None, label = 'middle class', legend = False)
+sns.lineplot(ax = ax[1], data = df_avgs_SH_half, x = '[step]', y = 'upper-avg-distance-services',
+                        ci = None, label ='upper class', legend = False)
+
+sns.lineplot(ax = ax[2], data = df_avgs_SH_max, x = '[step]', y = 'working-avg-distance-services',
+                        ci = None, label = 'working class')
+sns.lineplot(ax = ax[2], data = df_avgs_SH_max, x = '[step]', y = 'middle-avg-distance-services',
+                        ci = None, label = 'middle class')
+sns.lineplot(ax = ax[2], data = df_avgs_SH_max, x = '[step]', y = 'upper-avg-distance-services',
+                        ci = None, label ='upper class')
 
 ax[0].set_title('No social housing')
 ax[0].set_ylabel('Average distance from services')
 ax[0].set_xlabel('Simulation time')
 ax[1].set_xlabel('Simulation time')
-ax[1].set_title('With social housing')
+ax[1].set_title(f'With {SH_units_half} social housing units')
+ax[2].set_xlabel('Simulation time')
+ax[2].set_title(f'With {SH_units_max} social housing units')
     
 fig.get_figure().savefig(output_fol + "normative_segregation_distance_services.pdf",
                  bbox_inches='tight')
@@ -487,28 +532,37 @@ fig.get_figure().savefig(output_fol + "normative_segregation_distance_services.p
 plt.show()
 plt.close()
 
-fig,ax = plt.subplots(1, 2, sharey = True)
+
+fig,ax = plt.subplots(1, 3, sharey = True, figsize = (10, 5))
 
 sns.lineplot(ax = ax[0], data = df_avgs_no_SH, x = '[step]', y = 'working-avg-distance-green',
-                        palette = 'viridis', label = 'working class')
+                        label = 'working class', legend = False)
 sns.lineplot(ax = ax[0], data = df_avgs_no_SH, x = '[step]', y = 'middle-avg-distance-green',
-                        palette = 'Blues', label = 'middle class')
+                        label = 'middle class', legend = False)
 sns.lineplot(ax = ax[0], data = df_avgs_no_SH, x = '[step]', y = 'upper-avg-distance-green',
-                        palette = 'rocket', label ='upper class')
+                        label ='upper class', legend = False)
 
-sns.lineplot(ax = ax[1], data = df_avgs_SH, x = '[step]', y = 'working-avg-distance-green',
-                        palette = 'viridis', label = 'working class')
-sns.lineplot(ax = ax[1], data = df_avgs_SH, x = '[step]', y = 'middle-avg-distance-green',
-                        palette = 'Blues', label = 'middle class')
-sns.lineplot(ax = ax[1], data = df_avgs_SH, x = '[step]', y = 'upper-avg-distance-green',
-                        palette = 'rocket', label ='upper class')
+sns.lineplot(ax = ax[1], data = df_avgs_SH_half, x = '[step]', y = 'working-avg-distance-green',
+                        ci = None, label = 'working class', legend = False)
+sns.lineplot(ax = ax[1], data = df_avgs_SH_half, x = '[step]', y = 'middle-avg-distance-green',
+                        ci = None, label = 'middle class', legend = False)
+sns.lineplot(ax = ax[1], data = df_avgs_SH_half, x = '[step]', y = 'upper-avg-distance-green',
+                        ci = None, label ='upper class', legend = False)
+
+sns.lineplot(ax = ax[2], data = df_avgs_SH_max, x = '[step]', y = 'working-avg-distance-green',
+                        ci = None, label = 'working class')
+sns.lineplot(ax = ax[2], data = df_avgs_SH_max, x = '[step]', y = 'middle-avg-distance-green',
+                        ci = None, label = 'middle class')
+sns.lineplot(ax = ax[2], data = df_avgs_SH_max, x = '[step]', y = 'upper-avg-distance-green',
+                        ci = None, label ='upper class')
 
 ax[0].set_title('No social housing')
 ax[0].set_ylabel('Average distance from green areas')
 ax[0].set_xlabel('Simulation time')
 ax[1].set_xlabel('Simulation time')
-ax[1].set_title('With social housing')
-    
+ax[1].set_title(f'With {SH_units_half} social housing units')
+ax[2].set_xlabel('Simulation time')
+ax[2].set_title(f'With {SH_units_max} social housing units')
 fig.get_figure().savefig(output_fol + "normative_segregation_distance_green.pdf",
                  bbox_inches='tight')
 
@@ -557,7 +611,7 @@ def horizontal_barplot(df_here):
     labels = list(distribution.keys())
     data = np.array(list(distribution.values()))
     data_cum = data.cumsum(axis=1)
-    category_colors = sns.color_palette("hls", 3)
+    category_colors = sns.color_palette(['gold', 'limegreen', 'darkred'])
     
     fig, ax = plt.subplots(figsize=(9.2, 5))
     ax.invert_yaxis()

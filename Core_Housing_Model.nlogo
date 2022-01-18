@@ -545,7 +545,7 @@ reliance-on-network
 reliance-on-network
 0
 100
-87.0
+50.0
 1
 1
 NIL
@@ -613,7 +613,7 @@ SWITCH
 503
 social-housing?
 social-housing?
-0
+1
 1
 -1000
 
@@ -1065,7 +1065,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.4
+NetLogo 6.2.2
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
@@ -1154,6 +1154,94 @@ NetLogo 6.0.4
       <value value="false"/>
     </enumeratedValueSet>
     <steppedValueSet variable="number-socialhousing" first="100" step="50" last="350"/>
+    <enumeratedValueSet variable="minimum-score-middle">
+      <value value="55"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="baseline" repetitions="15" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="100"/>
+    <metric>segregation_working_obj ;;average segregation measure for the working class based on distribution of turtles of the same class in neighboring patches</metric>
+    <metric>segregation_middle_obj ;;average segregation measure for the middle class based on distribution of turtles of the same class in neighboring patches</metric>
+    <metric>segregation_upper_obj ;;average segregation measure for the upper class based on distribution of turtles of the same class in neighboring patches</metric>
+    <metric>segregation_working_norm ;;average segregation measure for the working class based on distance to greeneries and services</metric>
+    <metric>segregation_middle_norm ;;average segregation measure for the middle class based on distance to greeneries and services</metric>
+    <metric>segregation_upper_norm ;;average segregation measure for the upper class based on distance to greeneries and services</metric>
+    <metric>total-working</metric>
+    <metric>total-middle</metric>
+    <metric>total-upper</metric>
+    <metric>working-district-1</metric>
+    <metric>working-district-2</metric>
+    <metric>working-district-3</metric>
+    <metric>working-district-4</metric>
+    <metric>working-periphery</metric>
+    <metric>working-centre</metric>
+    <metric>middle-district-1</metric>
+    <metric>middle-district-2</metric>
+    <metric>middle-district-3</metric>
+    <metric>middle-district-4</metric>
+    <metric>middle-periphery</metric>
+    <metric>middle-centre</metric>
+    <metric>upper-district-1</metric>
+    <metric>upper-district-2</metric>
+    <metric>upper-district-3</metric>
+    <metric>upper-district-4</metric>
+    <metric>upper-periphery</metric>
+    <metric>upper-centre</metric>
+    <metric>working-avg-distance-services</metric>
+    <metric>middle-avg-distance-services</metric>
+    <metric>upper-avg-distance-services</metric>
+    <metric>working-avg-distance-green</metric>
+    <metric>middle-avg-distance-green</metric>
+    <metric>upper-avg-distance-green</metric>
+    <metric>percent-cannot-afford</metric>
+    <metric>percent-unhappy</metric>
+    <metric>min-income</metric>
+    <metric>max-income</metric>
+    <metric>mean-income</metric>
+    <metric>std-income</metric>
+    <metric>min-wealth</metric>
+    <metric>max-wealth</metric>
+    <metric>avg-wealth</metric>
+    <metric>std-wealth</metric>
+    <metric>min-houseprice</metric>
+    <metric>max-houseprice</metric>
+    <metric>avg-houseprice</metric>
+    <metric>std-houseprice</metric>
+    <enumeratedValueSet variable="reliance-on-network">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="fixed-distr-social-housing">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="income-socially-influenced?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="hide-links?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number">
+      <value value="1600"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="clustered-social-housing">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="minimum-score-upper">
+      <value value="65"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="social-housing?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="minimum-score-working">
+      <value value="40"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="different-district-colours?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number-socialhousing">
+      <value value="350"/>
+    </enumeratedValueSet>
     <enumeratedValueSet variable="minimum-score-middle">
       <value value="55"/>
     </enumeratedValueSet>

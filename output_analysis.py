@@ -45,16 +45,6 @@ df = df.sort_values( by = '[run number]', axis = 0).reset_index(drop = True)
 
 print( df.head(10) )
 
-#%%
-
-standard_columns = ['[run number]', 'reliance-on-network', 'number',
-       'income-socially-influenced?', 'fixed-distr-social-housing',
-       'hide-links?', 'clustered-social-housing', 'minimum-score-upper',
-       'social-housing?', 'minimum-score-working',
-       'different-district-colours?', 'number-socialhousing',
-       'minimum-score-middle', '[step]']
-
-
 #%% Baseline Scenario Plots
 
 df_baseline = df[df['social-housing?'] == False]

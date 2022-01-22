@@ -173,9 +173,9 @@ to update-households
     let income-past income
     ifelse income-socially-influenced? [
       ifelse any? turtles in-radius 3 [
-      set income round(income-past + 0.003 * mean([income] of households in-radius 3))][
-        set income round(income-past + 0.003 * income-past)]]
-      [set income round(income-past + 0.003 * income-past)]
+      set income round(income-past + income-growth-rate * mean([income] of households in-radius 3))][
+        set income round(income-past + income-growth-rate * income-past)]]
+      [set income round(income-past + income-growth-rate * income-past)]
     ;grow the number of rooms in the house if really rich
     if [rooms] of patch-here < members and (([rent-price] of patch-here) * 3) < income[
       ask patch-here[
@@ -198,10 +198,10 @@ to update-houses
     ifelse pcolor != orange [
       let old-price rent-price
       let avg-price mean ([rent-price] of neighbors)
-      set rent-price round(old-price + 0.003 * avg-price) ; could also include a factor for the average income of turtles around
+      set rent-price round(old-price + houseprice-growth-rate * avg-price) ; could also include a factor for the average income of turtles around
     ][
       let old-price rent-price
-      set rent-price round(old-price + 0.003 * old-price) ; could also include a factor for the average income of turtles around
+      set rent-price round(old-price + houseprice-growth-rate * old-price) ; could also include a factor for the average income of turtles around
     ]
 
      if ticks mod 20 = 0 and pcolor != orange [
@@ -249,10 +249,10 @@ ticks
 30.0
 
 MONITOR
-135
-465
-248
-510
+145
+485
+258
+530
 Percent Unhappy
 percent-unhappy
 1
@@ -260,10 +260,10 @@ percent-unhappy
 11
 
 MONITOR
-11
-465
-128
-510
+21
+485
+138
+530
 Percent cant afford
 percent-cannot-afford
 1
@@ -271,10 +271,10 @@ percent-cannot-afford
 11
 
 PLOT
-10
-150
-259
-293
+15
+185
+264
+328
 Percent of households that cannot afford their house
 time
 %
@@ -289,10 +289,10 @@ PENS
 "percent" 1.0 0 -2674135 true "" "plot percent-cannot-afford"
 
 PLOT
-10
-295
-259
-459
+15
+325
+264
+489
 Percent Unhappy
 time
 %
@@ -315,7 +315,7 @@ number
 number
 100
 count patches
-1600.0
+1200.0
 100
 1
 NIL
@@ -545,7 +545,7 @@ reliance-on-network
 reliance-on-network
 0
 100
-50.0
+0.0
 1
 1
 NIL
@@ -572,7 +572,7 @@ PENS
 SLIDER
 15
 115
-187
+160
 148
 number-socialhousing
 number-socialhousing
@@ -680,6 +680,36 @@ minimum-score-upper
 80
 65.0
 1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+0
+150
+150
+183
+houseprice-growth-rate
+houseprice-growth-rate
+0
+0.01
+0.001
+0.001
+1
+NIL
+HORIZONTAL
+
+SLIDER
+150
+150
+275
+183
+income-growth-rate
+income-growth-rate
+0
+0.01
+0.001
+0.001
 1
 NIL
 HORIZONTAL
@@ -1121,6 +1151,10 @@ NetLogo 6.2.2
     <metric>max-houseprice</metric>
     <metric>avg-houseprice</metric>
     <metric>std-houseprice</metric>
+    <metric>turtles-moved</metric>
+    <metric>working-moved</metric>
+    <metric>middle-moved</metric>
+    <metric>upper-moved</metric>
     <enumeratedValueSet variable="reliance-on-network">
       <value value="100"/>
     </enumeratedValueSet>
@@ -1245,6 +1279,96 @@ NetLogo 6.2.2
     <enumeratedValueSet variable="minimum-score-middle">
       <value value="55"/>
     </enumeratedValueSet>
+  </experiment>
+  <experiment name="benchmark" repetitions="10" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="110"/>
+    <metric>segregation_working_obj ;;average segregation measure for the working class based on distribution of turtles of the same class in neighboring patches</metric>
+    <metric>segregation_middle_obj ;;average segregation measure for the middle class based on distribution of turtles of the same class in neighboring patches</metric>
+    <metric>segregation_upper_obj ;;average segregation measure for the upper class based on distribution of turtles of the same class in neighboring patches</metric>
+    <metric>segregation_working_norm ;;average segregation measure for the working class based on distance to greeneries and services</metric>
+    <metric>segregation_middle_norm ;;average segregation measure for the middle class based on distance to greeneries and services</metric>
+    <metric>segregation_upper_norm ;;average segregation measure for the upper class based on distance to greeneries and services</metric>
+    <metric>total-working</metric>
+    <metric>total-middle</metric>
+    <metric>total-upper</metric>
+    <metric>working-district-1</metric>
+    <metric>working-district-2</metric>
+    <metric>working-district-3</metric>
+    <metric>working-district-4</metric>
+    <metric>working-periphery</metric>
+    <metric>working-centre</metric>
+    <metric>middle-district-1</metric>
+    <metric>middle-district-2</metric>
+    <metric>middle-district-3</metric>
+    <metric>middle-district-4</metric>
+    <metric>middle-periphery</metric>
+    <metric>middle-centre</metric>
+    <metric>upper-district-1</metric>
+    <metric>upper-district-2</metric>
+    <metric>upper-district-3</metric>
+    <metric>upper-district-4</metric>
+    <metric>upper-periphery</metric>
+    <metric>upper-centre</metric>
+    <metric>working-avg-distance-services</metric>
+    <metric>middle-avg-distance-services</metric>
+    <metric>upper-avg-distance-services</metric>
+    <metric>working-avg-distance-green</metric>
+    <metric>middle-avg-distance-green</metric>
+    <metric>upper-avg-distance-green</metric>
+    <metric>percent-cannot-afford</metric>
+    <metric>percent-unhappy</metric>
+    <metric>min-income</metric>
+    <metric>max-income</metric>
+    <metric>mean-income</metric>
+    <metric>std-income</metric>
+    <metric>min-wealth</metric>
+    <metric>max-wealth</metric>
+    <metric>avg-wealth</metric>
+    <metric>std-wealth</metric>
+    <metric>min-houseprice</metric>
+    <metric>max-houseprice</metric>
+    <metric>avg-houseprice</metric>
+    <metric>std-houseprice</metric>
+    <metric>turtles-moved</metric>
+    <metric>working-moved</metric>
+    <metric>middle-moved</metric>
+    <metric>upper-moved</metric>
+    <steppedValueSet variable="number" first="1200" step="200" last="1600"/>
+    <enumeratedValueSet variable="income-socially-influenced?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="hide-links?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="clustered-social-housing">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="different-district-colours?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="minimum-score-middle">
+      <value value="55"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="reliance-on-network" first="0" step="25" last="100"/>
+    <enumeratedValueSet variable="fixed-distr-social-housing">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="income-growth-rate" first="0.001" step="0.002" last="0.007"/>
+    <enumeratedValueSet variable="minimum-score-upper">
+      <value value="65"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="social-housing?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="minimum-score-working">
+      <value value="40"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number-socialhousing">
+      <value value="350"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="houseprice-growth-rate" first="0.001" step="0.002" last="0.007"/>
   </experiment>
 </experiments>
 @#$#@#$#@

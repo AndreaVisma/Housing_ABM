@@ -54,6 +54,11 @@ globals [
   max-houseprice
   avg-houseprice
   std-houseprice
+  
+  turtles-moved
+  working-moved
+  middle-moved
+  upper-moved
 ]
 
 
@@ -160,5 +165,10 @@ to household-reporters
   set max-houseprice max[rent-price] of patches with [pcolor != green]
   set avg-houseprice mean[rent-price] of patches with [pcolor != green]
   set std-houseprice standard-deviation[rent-price] of patches with [pcolor != green]
+  
+  set turtles-moved count households with [just-moved? = 1]
+  set working-moved count households with [just-moved? = 1 and class = "working class"]
+  set middle-moved count households with [just-moved? = 1 and class = "middle class"]
+  set upper-moved count households with [just-moved? = 1 and class = "upper class"]
 end
 
